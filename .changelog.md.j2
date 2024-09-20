@@ -1,0 +1,30 @@
+{% for entry in tree %}
+
+# {{ entry.version }}{% if entry.date %} ({{ entry.date }}){% endif %}
+
+{% for change_key, changes in entry.changes.items() %}
+
+{% if change_key %}
+## {{ change_key }}
+{% endif %}
+{% set scopemap = {
+  'changelog': 'Changelog',
+  'contributing': 'Contributing guide',
+  'helpers': 'Helpers',
+  'sphinx': 'Rendered documentation',
+  'typeannotation': 'Type annotation',
+} %}
+
+{# no-scope changes #}
+{% for change in changes | rejectattr("scope") %}
+- {{ change.message }} [[{{ change.sha1 | truncate(8, true, '') }}]](https://github.com/datalad/datalad-core/commit/{{ change.sha1 | truncate(8, true, '') }})
+{% endfor %}
+{# scoped changes #}
+{% for scope, scope_changes in changes | selectattr("scope") | groupby("scope") %}
+- {{ scopemap.get(scope, scope) }}:
+{% for change in scope_changes %}
+  - {{ change.message }} [[{{ change.sha1 | truncate(8, true, '') }}]](https://github.com/datalad/datalad-core/commit/{{ change.sha1 | truncate(8, true, '') }})
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endfor %}

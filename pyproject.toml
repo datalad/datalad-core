@@ -44,6 +44,15 @@ Issues = "https://github.com/datalad/datalad-core/issues"
 Source = "https://github.com/datalad/datalad-core"
 Changelog = "https://github.com/datalad/datalad-core/blob/main/CHANGELOG.md"
 
+[tool.hatch.envs.hatch-test]
+default-args = ["datalad_core"]
+extra-dependencies = [
+  "pytest",
+  # if you come here, because coverage combination crashed for you
+  # run `hatch test --cover` and/or see
+  # https://github.com/pypa/hatch/issues/1565#issuecomment-2163773123
+  "pytest-cov",
+]
 [tool.hatch.envs.docs]
 extra-dependencies = [
   "sphinx",
@@ -57,4 +66,26 @@ clean = [
   "make -C docs clean",
 ]
 
+
+[tool.coverage.run]
+source_pkgs = ["datalad_core", "tests"]
+branch = true
+parallel = true
+omit = [
+#  "src/datalad_core/__about__.py",
+]
+data_file = "${COVERAGE_ROOT-.}/.coverage"
+
+[tool.coverage.paths]
+datalad_core = ["src/datalad_core", "*/datalad_core/src/datalad_core"]
+tests = ["tests", "*/datalad_core/tests"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
 

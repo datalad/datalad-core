@@ -1,3 +1,4 @@
+datalad_core/_version.py
 dist/
 .coverage
 docs/generated

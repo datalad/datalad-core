@@ -1,0 +1,17 @@
+name: Static code check
+on: [push, pull_request]
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # run on a "fresh" python
+          python-version: 3.12
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install hatch
+        run: python -m pip install hatch
+      - name: Check code
+        run: hatch fmt --check

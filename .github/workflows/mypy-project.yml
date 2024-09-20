@@ -1,0 +1,29 @@
+name: Type annotation (project)
+
+on:
+  push:
+    paths:
+      - 'datalad_core/**.py'
+      - '!**/tests/**.py'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # run on a "fresh" python, but see mypy flag to check for the oldest supported version
+          python-version: 3.12
+          architecture: x64
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install hatch (which pull mypy)
+        run: python -m pip install hatch
+      - name: Type check project
+        run: |
+          # get any type stubs that mypy thinks it needs
+          hatch run types:mypy --install-types --non-interactive --follow-imports skip datalad_core
+          # run mypy on the full project.
+          # run on the oldest supported Python version
+          hatch run types:mypy --python-version 3.9 --pretty --show-error-context datalad_core

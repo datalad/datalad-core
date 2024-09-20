@@ -1,0 +1,41 @@
+name: Type annotation (PR)
+
+on:
+  pull_request:
+    paths:
+      - 'datalad_core/**.py'
+      - '!**/tests/**.py'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # run on a "fresh" python, but see mypy flag to check for the oldest supported version
+          python-version: 3.12
+          architecture: x64
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install hatch (which pull mypy)
+        run: python -m pip install hatch
+      - name: Get Python changed files
+        id: changed-py-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            *.py
+            **/*.py
+      - name: Type check changed files
+        if: steps.changed-py-files.outputs.any_changed == 'true'
+        run: |
+          # get any type stubs that mypy thinks it needs
+          hatch run types:mypy --install-types --non-interactive --follow-imports skip ${{ steps.changed-py-files.outputs.all_changed_files }}
+          # run mypy on the modified files only, and do not even follow imports.
+          # this results is a fairly superficial test, but given the overall
+          # state of annotations, we strive to become more correct incrementally
+          # with focused error reports, rather than barfing a huge complaint
+          # that is unrelated to the changeset someone has been working on.
+          # run on the oldest supported Python version
+          hatch run types:mypy --python-version 3.9 --follow-imports skip --pretty --show-error-context ${{ steps.changed-py-files.outputs.all_changed_files }}

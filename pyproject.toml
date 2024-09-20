@@ -44,3 +44,17 @@ Issues = "https://github.com/datalad/datalad-core/issues"
 Source = "https://github.com/datalad/datalad-core"
 Changelog = "https://github.com/datalad/datalad-core/blob/main/CHANGELOG.md"
 
+[tool.hatch.envs.docs]
+extra-dependencies = [
+  "sphinx",
+]
+[tool.hatch.envs.docs.scripts]
+build = [
+  "make -C docs html",
+]
+clean = [
+  "rm -rf docs/generated",
+  "make -C docs clean",
+]
+
+

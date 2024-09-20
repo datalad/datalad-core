@@ -1,0 +1,46 @@
+[build-system]
+requires = [
+  "hatchling",
+  "hatch-vcs",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datalad-core"
+dynamic = ["version"]
+description = 'core library for the datalad-framework'
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+keywords = [
+  "datalad",
+  "git",
+  "git-annex",
+]
+authors = [
+  { name = "Michael Hanke", email = "michael.hanke@gmail.com" },
+]
+maintainers = [
+  { name = "Michael Hanke", email = "michael.hanke@gmail.com" },
+]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/datalad/datalad-core"
+Documentation = "https://github.com/datalad/datalad-core#readme"
+Issues = "https://github.com/datalad/datalad-core/issues"
+Source = "https://github.com/datalad/datalad-core"
+Changelog = "https://github.com/datalad/datalad-core/blob/main/CHANGELOG.md"
+

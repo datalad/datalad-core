@@ -69,6 +69,15 @@ clean = [
   "make -C docs clean",
 ]
 
+[tool.hatch.envs.cz]
+extra-dependencies = [
+  "commitizen",
+]
+[tool.hatch.envs.cz.scripts]
+check = [
+  # check all commit messages since the (before) beginning
+  "cz check --rev-range 4b825dc642cb6eb9a060e54bf8d69288fbee4904..HEAD",
+]
 
 [tool.coverage.run]
 source_pkgs = ["datalad_core", "tests"]
@@ -91,4 +100,14 @@ exclude_lines = [
   "if TYPE_CHECKING:",
   "raise NotImplementedError",
 ]
+
+
+[tool.commitizen]
+name = "cz_customize"
+
+[tool.commitizen.customize]
+commit_parser = "^((?P<change_type>feat|fix|rf|perf|test|doc|BREAKING CHANGE)(?:\\((?P<scope>[^()\r\n]*)\\)|\\()?(?P<breaking>!)?|\\w+!):\\s(?P<message>.*)?(?P<body>.*)?"
+change_type_order = ["BREAKING CHANGE", "feat", "fix", "rf", "perf", "doc", "test"]
+schema_pattern = "(?s)(ci|doc|feat|fix|perf|rf|style|test|chore|revert|bump)(\\(\\S+\\))?!?:( [^\\n\\r]+)((\\n\\n.*)|(\\s*))?$"
+
 

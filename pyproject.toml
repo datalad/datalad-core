@@ -101,6 +101,28 @@ exclude_lines = [
   "raise NotImplementedError",
 ]
 
+[tool.ruff]
+exclude = [
+  # sphinx
+  "docs",
+]
+line-length = 88
+indent-width = 4
+target-version = "py39"
+[tool.ruff.format]
+# Prefer single quotes over double quotes.
+quote-style = "single"
+[tool.ruff.lint.per-file-ignores]
+"**/test_*" = [
+  # permit assert statements in tests
+  "S101",
+  # permit relative import in tests
+  "TID252",
+  # permit versatile function names in tests
+  "N802",
+]
+# permit relative import in subpackage root
+"datalad_core/*/__init__.py" = ["TID252"]
 
 [tool.commitizen]
 name = "cz_customize"

@@ -101,6 +101,17 @@ bump-version = [
   "cz bump --changelog",
 ]
 
+[tool.hatch.envs.codespell]
+extra-dependencies = [
+  "codespell",
+]
+[tool.hatch.envs.codespell.scripts]
+check = "codespell"
+fix = "codespell --write-changes"
+
+[tool.codespell]
+skip = ".git,build,.*cache,dist"
+
 [tool.coverage.run]
 source_pkgs = ["datalad_core", "tests"]
 branch = true

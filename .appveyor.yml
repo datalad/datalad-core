@@ -45,7 +45,7 @@
 #     respective CI run configuration).
 
 
-# do not make repository clone cheap: interfers with VCS-based version determination
+# do not make repository clone cheap: interferes with VCS-based version determination
 shallow_clone: false
 
 # turn of support for MS project build support (not needed)

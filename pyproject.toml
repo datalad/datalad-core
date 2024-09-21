@@ -134,7 +134,11 @@ check = "codespell"
 fix = "codespell --write-changes"
 
 [tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
 skip = ".git,build,.*cache,dist"
+check-hidden = true
+# ignore-regex = ''
+# ignore-words-list = ''
 
 [tool.coverage.run]
 source_pkgs = ["datalad_core", "tests"]

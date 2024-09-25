@@ -166,7 +166,7 @@ Only items importable from the sub-package's top-level are considered to be part
 If a sub-module is imported in the sub-package's `__init__.py`, consider adding `__all__` to the sub-module to restrict wildcard imports from the sub-module, and to document what is considered to be part of the "public" API.
 
 Sub-packages should be as self-contained as possible.
-When functionality is shared between sub-packages, absolute imports should be made.
+If functionality is shared between sub-packages, absolute imports should be made.
 
 
 ### Imports

@@ -52,7 +52,7 @@ hatch run docs:clean
 ### Check type annotations
 
 ```
-hatch run types:check
+hatch run types:check [<paths>]
 ```
 
 ### Check commit messages for compliance with [Conventional Commits](https://www.conventionalcommits.org)

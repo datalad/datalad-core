@@ -86,7 +86,7 @@ extra-dependencies = [
 ]
 [tool.hatch.envs.types.scripts]
 check = [
-  "mypy --install-types --non-interactive --python-version 3.9 --pretty --show-error-context datalad_core",
+  "mypy --install-types --non-interactive --python-version 3.9 --pretty --show-error-context {args:datalad_core}",
 ]
 
 [tool.hatch.envs.docs]

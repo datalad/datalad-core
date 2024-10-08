@@ -42,7 +42,9 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "datasalad >= 0.4.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/datalad/datalad-core"

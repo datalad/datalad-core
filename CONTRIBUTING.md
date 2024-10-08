@@ -11,7 +11,7 @@
 This package aims to be a lightweight library, to be used by any and all DataLad packages.
 Contributed code should match this scope.
 Special-interested functionality or code concerned with individual services and packages should be contributed elsewhere.
-Morever, additional software dependencies should not be added carelessly -- a reasonably small dependency footprint is a key goal of this library.
+Moreover, additional software dependencies should not be added carelessly -- a reasonably small dependency footprint is a key goal of this library.
 
 ## Developer cheat sheet
 

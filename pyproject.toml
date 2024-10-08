@@ -51,6 +51,12 @@ Issues = "https://github.com/datalad/datalad-core/issues"
 Source = "https://github.com/datalad/datalad-core"
 Changelog = "https://github.com/datalad/datalad-core/blob/main/CHANGELOG.md"
 
+[project.optional-dependencies]
+docs = [
+  "sphinx",
+  "sphinx_rtd_theme",
+]
+
 [tool.hatch.version]
 source = "vcs"
 
@@ -93,6 +99,7 @@ check = [
 description = "build Sphinx-based docs"
 extra-dependencies = [
   "sphinx",
+  "sphinx_rtd_theme",
 ]
 [tool.hatch.envs.docs.scripts]
 build = [

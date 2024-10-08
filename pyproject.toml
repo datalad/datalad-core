@@ -141,7 +141,7 @@ check = "codespell"
 fix = "codespell --write-changes"
 
 [tool.codespell]
-skip = ".git,build,.*cache,dist"
+skip = ".git,build,.*cache,dist,*/_build"
 
 [tool.coverage.run]
 source_pkgs = ["datalad_core", "tests"]

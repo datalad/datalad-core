@@ -46,6 +46,9 @@ dependencies = [
   "datasalad >= 0.4.0",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project.urls]
 Homepage = "https://github.com/datalad/datalad-core"
 Documentation = "https://github.com/datalad/datalad-core#readme"

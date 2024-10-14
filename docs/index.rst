@@ -10,6 +10,7 @@ Also see the :ref:`modindex`.
 .. autosummary::
    :toctree: generated
 
+   consts
    runners
 
 

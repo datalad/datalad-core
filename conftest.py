@@ -2,13 +2,19 @@
 
 __all__ = [
     'cfgman',
+    'bareannexrepo',
     'baregitrepo',
+    'annexrepo',
     'gitrepo',
     'verify_pristine_gitconfig_global',
 ]
 
 
 from datalad_core.tests.fixtures import (
+    # function-scope temporary Git repo with an initialized annex
+    annexrepo,
+    # function-scope temporary, bare Git repo with an initialized annex
+    bareannexrepo,
     # function-scope temporary, bare Git repo
     baregitrepo,
     # function-scope config manager

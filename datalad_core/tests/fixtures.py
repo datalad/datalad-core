@@ -118,3 +118,25 @@ def baregitrepo(tmp_path_factory) -> Generator[Path]:
         capture_output=True,
     )
     return path
+
+
+@pytest.fixture(autouse=False, scope='function')  # noqa: PT003
+def bareannexrepo(baregitrepo) -> Generator[Path]:
+    """Yield the path to a bare Git repository with an initialized annex"""
+    call_git(
+        ['annex', 'init'],
+        cwd=baregitrepo,
+        capture_output=True,
+    )
+    return baregitrepo
+
+
+@pytest.fixture(autouse=False, scope='function')  # noqa: PT003
+def annexrepo(gitrepo) -> Generator[Path]:
+    """Yield the path to a Git repository with an initialized annex"""
+    call_git(
+        ['annex', 'init'],
+        cwd=gitrepo,
+        capture_output=True,
+    )
+    return gitrepo

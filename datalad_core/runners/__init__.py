@@ -16,6 +16,7 @@ git-annex).
    call_git_lines
    call_git_oneline
    call_git_success
+   call_annex_json_lines
    iter_subproc
    iter_git_subproc
    CommandError
@@ -29,6 +30,7 @@ __all__ = [
     'call_git_lines',
     'call_git_oneline',
     'call_git_success',
+    'call_annex_json_lines',
 ]
 
 
@@ -37,6 +39,7 @@ from datasalad.runners import (
     iter_subproc,
 )
 
+from .annex import call_annex_json_lines
 from .git import (
     call_git,
     call_git_lines,

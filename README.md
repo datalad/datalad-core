@@ -3,6 +3,7 @@
 [![Documentation Status](https://readthedocs.org/projects/datalad-core/badge/?version=latest)](https://datalad-core.readthedocs.io/en/latest/?badge=latest)
 [![Build status](https://ci.appveyor.com/api/projects/status/r115bg2iqtvymww4/branch/main?svg=true)](https://ci.appveyor.com/project/mih/datalad-core/branch/main)
 [![codecov](https://codecov.io/github/datalad/datalad-core/graph/badge.svg?token=9RG02U6TY4)](https://codecov.io/github/datalad/datalad-core)
+[![Maintainability](https://api.codeclimate.com/v1/badges/70898ddc307acedcd2e6/maintainability)](https://codeclimate.com/github/datalad/datalad-core/maintainability)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
 ## Developing with `datalad_core`

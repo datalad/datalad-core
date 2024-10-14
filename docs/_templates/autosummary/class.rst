@@ -4,6 +4,7 @@
 .. currentmodule:: {{ module }}
 .. autoclass:: {{ fullname }}
    :members:
+   :inherited-members:
    :undoc-members:
    :show-inheritance:
    :special-members: __eq__

@@ -1,5 +1,7 @@
 from shutil import rmtree
 
+import pytest
+
 from ..repo import Repo
 
 
@@ -25,3 +27,12 @@ def test_repo_vanish(baregitrepo):
     assert repo.flyweight_valid()
     rmtree(baregitrepo)
     assert not repo.flyweight_valid()
+
+
+def test_repo_init_at(tmp_path):
+    # only existing directories
+    with pytest.raises((FileNotFoundError, NotADirectoryError)):
+        Repo.init_at(tmp_path / 'nothere')
+
+    repo = Repo.init_at(tmp_path)
+    assert repo.path == tmp_path.absolute()

@@ -19,6 +19,7 @@ from datalad_core.config import (
     get_manager,
 )
 from datalad_core.repo.gitmanaged import GitManaged
+from datalad_core.runners import call_git
 
 
 class Repo(GitManaged):
@@ -85,3 +86,19 @@ class Repo(GitManaged):
             )
             self._config = lman
         return self._config
+
+    @classmethod
+    def init_at(cls, path: Path) -> Repo:
+        """Initialize a bare repository in an existing directory
+
+        There is no test for an existing repository at ``path``. A potential
+        reinitialization is generally safe. Use cases are described in the
+        ``git init`` documentation.
+        """
+        # TODO: support --shared, needs to establish ENUM for options
+        call_git(
+            ['init', '--bare'],
+            cwd=path,
+            capture_output=True,
+        )
+        return cls(path)

@@ -23,6 +23,8 @@ standard_gitconfig = f"""\
 [user]
     name = DataLad Tester
     email = test@example.com
+[extensions]
+    worktreeConfig = false
 """
 
 

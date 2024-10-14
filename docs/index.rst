@@ -12,6 +12,7 @@ Also see the :ref:`modindex`.
 
    config
    consts
+   repo
    runners
 
 

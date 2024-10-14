@@ -1,3 +1,5 @@
+import pytest
+
 from datalad_core.config import ConfigItem
 from datalad_core.runners import call_git
 
@@ -88,3 +90,48 @@ def test_secondary_worktree(gitrepo):
     assert rwd[wt1] == 'wt1'
     assert rwd[wt2] == 'wt2'
     assert rwd[wt1.repo] == 'repo'
+
+
+def test_worktree_init_at(tmp_path):
+    # only existing directories
+    with pytest.raises((FileNotFoundError, NotADirectoryError)):
+        Worktree.init_at(tmp_path / 'nothere')
+
+    orig_wt_path = tmp_path / 'orig_wt'
+    orig_wt_path.mkdir()
+    orig_wt = Worktree.init_at(orig_wt_path)
+    assert orig_wt.path == orig_wt_path.absolute()
+    # cursory test that the repo is functional
+    assert orig_wt.repo.config['core.bare'].value is False
+    assert orig_wt.config['core.bare'].value is False
+
+    # init alternative worktree. This is not a "linked" worktree.
+    # instead this merely points to the same repository. changes
+    # made in this worktree will cause unsychronized differences
+    # at `orig_wt`. Likely not a use case, but we are testing the
+    # proper functioning of the mechanics anyways
+    alt_wt_path = tmp_path / 'alt_wt'
+    alt_wt_path.mkdir()
+    alt_wt = Worktree.init_at(alt_wt_path, gitdir=orig_wt.repo.path)
+    assert alt_wt.path == alt_wt_path.absolute()
+    assert alt_wt.config['core.bare'].value is False
+    assert orig_wt.repo is alt_wt.repo
+
+    # try relocating the repository of a worktree
+    sep_wt_path = tmp_path / 'sep_wt'
+    sep_wt_path.mkdir()
+    sep_repo_path = tmp_path / 'sep_repo'
+    sep_repo_path.mkdir()
+    sep_wt = Worktree.init_at(sep_wt_path, gitdir=sep_repo_path)
+    assert sep_wt.config['core.bare'].value is False
+    # relocate
+    assert sep_repo_path.is_dir()
+    # keep ref for testing
+    sep_repo_old = sep_wt.repo
+    sep_repo_path_new = tmp_path / 'sep_repo_new'
+    sep_wt_new = Worktree.init_at(sep_wt_path, gitdir=sep_repo_path_new)
+    assert sep_wt_new is sep_wt
+    assert not sep_repo_path.is_dir()
+    # we got a new instance for the repo
+    assert sep_wt.repo is not sep_repo_old
+    assert sep_wt.repo.path == sep_repo_path_new

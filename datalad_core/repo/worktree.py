@@ -15,6 +15,7 @@ from datalad_core.config import (
 )
 from datalad_core.repo.gitmanaged import GitManaged
 from datalad_core.repo.repo import Repo
+from datalad_core.runners import call_git
 
 
 class Worktree(GitManaged):
@@ -123,3 +124,33 @@ class Worktree(GitManaged):
         if self._repo is None:
             self._repo = Repo(self.git_common_dir)
         return self._repo
+
+    @classmethod
+    def init_at(cls, path: Path, gitdir: Path | None = None) -> Worktree:
+        """Initialize a worktree for a new/existing repository in a directory
+
+        A worktree will be (re)initialized at ``path``.
+
+        If ``gitdir`` is given it will be passed to
+        ``git init --separate-git-dir``. Depending on whether the location at
+        ``path`` has already been initialized, an existing repository will
+        be relocated (see ``git init`` documentation).
+        """
+        cmd = ['init']
+        if gitdir is not None:
+            cmd.extend(('--separate-git-dir', str(gitdir)))
+        # TODO: support --shared, needs to establish ENUM for options
+        call_git(
+            cmd,
+            cwd=path,
+            capture_output=True,
+        )
+        wt = cls(path)
+        if gitdir is not None:
+            # this call could have relocated the underlying repo.
+            # drop all previous references and evaluate from scratch.
+            # we could do upfront inspection instead, but this is
+            # resonably cheap, and safeer to do unconditionally.
+            wt.repo.reset()
+            wt.reset()
+        return wt

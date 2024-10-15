@@ -107,7 +107,7 @@ def test_worktree_init_at(tmp_path):
 
     # init alternative worktree. This is not a "linked" worktree.
     # instead this merely points to the same repository. changes
-    # made in this worktree will cause unsychronized differences
+    # made in this worktree will cause unsynchronized differences
     # at `orig_wt`. Likely not a use case, but we are testing the
     # proper functioning of the mechanics anyways
     alt_wt_path = tmp_path / 'alt_wt'

@@ -13,8 +13,10 @@ from datalad_core.config import (
     ConfigManager,
     WorktreeGitConfig,
 )
+from datalad_core.repo.annex import Annex
 from datalad_core.repo.gitmanaged import GitManaged
 from datalad_core.repo.repo import Repo
+from datalad_core.repo.utils import init_annex_at
 from datalad_core.runners import call_git
 
 
@@ -38,6 +40,7 @@ class Worktree(GitManaged):
 
     def reset(self) -> None:
         super().reset()
+        self._annex: Annex | None = None
         self._config: ConfigManager | None = None
         self._repo: Repo | None = None
 
@@ -125,6 +128,38 @@ class Worktree(GitManaged):
             self._repo = Repo(self.git_common_dir)
         return self._repo
 
+    def init_annex(
+        self,
+        description: str | None = None,
+        *,
+        autoenable_remotes: bool = True,
+    ) -> Annex:
+        """ """
+        # refuse for non-bare
+        init_annex_at(
+            self.path,
+            description=description,
+            autoenable_remotes=autoenable_remotes,
+        )
+        annex = self.annex
+        if annex is None:  # pragma: no cover
+            msg = 'could not initialize annex unexpectedly'
+            raise RuntimeError(msg)
+        return annex
+
+    @property
+    def annex(self) -> Annex | None:
+        if self._annex is None:
+            try:
+                self._annex = Annex(self.path)
+            except ValueError:
+                # resetting it to None means that we will keep trying to
+                # locate an annex each time. I believe this is a sensible
+                # behavior. A once-present annex is unlikely to go away,
+                # but an annex could be initialized at any time
+                self._annex = None
+        return self._annex
+
     @classmethod
     def init_at(cls, path: Path, gitdir: Path | None = None) -> Worktree:
         """Initialize a worktree for a new/existing repository in a directory
@@ -150,7 +185,7 @@ class Worktree(GitManaged):
             # this call could have relocated the underlying repo.
             # drop all previous references and evaluate from scratch.
             # we could do upfront inspection instead, but this is
-            # resonably cheap, and safeer to do unconditionally.
+            # reasonably cheap, and safeer to do unconditionally.
             wt.repo.reset()
             wt.reset()
         return wt

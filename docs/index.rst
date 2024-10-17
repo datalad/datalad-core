@@ -11,6 +11,7 @@ Also see the :ref:`modindex`.
    :toctree: generated
 
    config
+   constraints
    consts
    repo
    runners

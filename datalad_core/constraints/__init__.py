@@ -22,6 +22,14 @@ customizable) error messages, and is capable of communicating the underlying
 causes of an error in full detail without the need to generate long textual
 descriptions.
 
+If the provided input descriptions and error messages of a particular
+constraint are not an optimal fit for a particular context, they can be replace
+by wrapping a constraint instance into :class:`WithDescription`. This creates a
+new constraint instance that maintains the exact same validation/coercion
+behavior, but has a targeted description (input synopsis and description,
+and/or error message template).
+
+
 .. currentmodule:: datalad_core.constraints
 .. autosummary::
    :toctree: generated
@@ -30,6 +38,7 @@ descriptions.
    AllOf
    AnyOf
    ConstraintError
+   WithDescription
 """
 
 __all__ = [
@@ -37,6 +46,7 @@ __all__ = [
     'AllOf',
     'AnyOf',
     'ConstraintError',
+    'WithDescription',
 ]
 
 
@@ -48,3 +58,4 @@ from .constraint import (
 from .exceptions import (
     ConstraintError,
 )
+from .wrapper import WithDescription

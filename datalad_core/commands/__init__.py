@@ -24,6 +24,7 @@ classes.
    :toctree: generated
 
    datalad_command
+   Dataset
    ResultHandler
    StandardResultHandler
    PassthroughHandler
@@ -32,6 +33,7 @@ classes.
 """
 
 __all__ = [
+    'Dataset',
     'StandardResultHandler',
     'ResultHandler',
     'PassthroughHandler',
@@ -41,6 +43,7 @@ __all__ = [
 ]
 
 
+from .dataset import Dataset
 from .decorator import datalad_command
 from .default_result_handler import (
     StandardResultHandler,

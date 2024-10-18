@@ -22,6 +22,18 @@ def test_repo(baregitrepo):
     assert repo.git_common_dir == baregitrepo
 
 
+def test_repo_error(tmp_path):
+    err_match = 'not point to an existing Git'
+    with pytest.raises(ValueError, match=err_match):
+        Repo(tmp_path)
+    with pytest.raises(ValueError, match=err_match):
+        Repo(tmp_path / 'notexist')
+    test_file = tmp_path / 'afile'
+    test_file.touch()
+    with pytest.raises(ValueError, match=err_match):
+        Repo(test_file)
+
+
 def test_repo_vanish(baregitrepo):
     repo = Repo(baregitrepo)
     assert repo.flyweight_valid()

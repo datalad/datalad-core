@@ -6,9 +6,15 @@ from abc import (
     ABC,
     abstractmethod,
 )
-from typing import Any
+from typing import (
+    TYPE_CHECKING,
+    Any,
+)
 
 from datalad_core.constraints.exceptions import ConstraintError
+
+if TYPE_CHECKING:
+    from datalad_core.commands import Dataset
 
 
 class Constraint(ABC):
@@ -80,14 +86,16 @@ class Constraint(ABC):
         """
         return self.input_synopsis
 
-    # TODO: also have these for AnyOf and AllOf
-    #    def for_dataset(self, dataset: DatasetParameter) -> Constraint:
-    #        """Return a constraint-variant for a specific dataset context
-    #
-    #        The default implementation returns the unmodified, identical
-    #        constraint. However, subclasses can implement different behaviors.
-    #        """
-    #        return self
+    # this is called 'for_dataset' and not 'for_submodule' or 'for_repo'
+    # or 'for_worktree' to give a lot of flexibility re what semantics
+    # constraints can apply to a transformation like this
+    def for_dataset(self, dataset: Dataset) -> Constraint:  # noqa: ARG002
+        """Return a constraint-variant for a specific dataset context
+
+        The default implementation returns the unmodified, identical
+        constraint. However, subclasses can implement different behaviors.
+        """
+        return self
 
     @abstractmethod
     def __call__(self, value: Any):
@@ -120,6 +128,14 @@ class _MultiConstraint(Constraint):
             return f'{doc}'
         # dont fiddle with the single item, just take it
         return doc
+
+    def for_dataset(self, dataset: Dataset) -> Constraint:
+        """Return a constraint-variant for a specific dataset context
+
+        The default implementation returns the unmodified, identical
+        constraint. However, subclasses can implement different behaviors.
+        """
+        return self.__class__(*(c.for_dataset(dataset) for c in self.constraints))
 
 
 class AnyOf(_MultiConstraint):

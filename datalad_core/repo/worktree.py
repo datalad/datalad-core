@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
 from weakref import WeakValueDictionary
-
-if TYPE_CHECKING:
-    from pathlib import Path
-
 
 from datalad_core.config import (
     ConfigItem,
@@ -17,7 +13,11 @@ from datalad_core.repo.annex import Annex
 from datalad_core.repo.gitmanaged import GitManaged
 from datalad_core.repo.repo import Repo
 from datalad_core.repo.utils import init_annex_at
-from datalad_core.runners import call_git
+from datalad_core.runners import (
+    CommandError,
+    call_git,
+    call_git_oneline,
+)
 
 
 class Worktree(GitManaged):
@@ -35,7 +35,26 @@ class Worktree(GitManaged):
         self,
         path: Path,
     ):
-        super().__init__(path)
+        """
+        ``path`` is the path to an existing repository worktree/checkout.
+        """
+        # test and resolve to worktree root
+        try:
+            resolved_root = Path(
+                call_git_oneline(
+                    [
+                        '-C',
+                        str(path),
+                        'rev-parse',
+                        '--path-format=absolute',
+                        '--show-toplevel',
+                    ],
+                )
+            )
+        except CommandError as e:
+            msg = f'{path} does not point to an existing Git worktree/checkout'
+            raise ValueError(msg) from e
+        super().__init__(resolved_root)
         self.reset()
 
     def reset(self) -> None:

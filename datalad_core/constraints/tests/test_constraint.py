@@ -1,5 +1,6 @@
 import pytest
 
+from datalad_core.commands import Dataset
 from datalad_core.constraints.constraint import (
     AllOf,
     Constraint,
@@ -107,3 +108,36 @@ def test_constraint_allof():
     # the current implementation is not sufficient anyways
     assert EnsureInt().input_description in int5.input_description
     assert eq5.input_description in int5.input_description
+
+
+def test_constraint_for_dataset():
+    class BecomesB(Constraint):
+        input_synopsis = 'B'
+
+        def __call__(self, value):  # noqa: ARG002
+            return 'B'
+
+    class WeirdOne(Constraint):
+        input_synopsis = 'shapeshifter'
+
+        def __call__(self, value):  # noqa: ARG002
+            return 'A'
+
+        def for_dataset(self, dataset):  # noqa: ARG002
+            return BecomesB()
+
+    c1 = WeirdOne()
+    assert c1('anything') == 'A'
+    c2 = c1.for_dataset(Dataset(None))
+    assert c2.input_description == 'B'
+    assert c2('anything') == 'B'
+
+    # same when put into a MultiConstraint
+    ca = AllOf(WeirdOne())
+    assert ca('anything') == 'A'
+    cb = ca.for_dataset(Dataset(None))
+    assert cb('anything') == 'B'
+
+    # without a dedicated implementation there is no transformation
+    c = BecomesB()
+    assert c.for_dataset(Dataset(None)) is c

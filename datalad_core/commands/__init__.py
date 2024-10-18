@@ -5,6 +5,7 @@
    :toctree: generated
 
    datalad_command
+   Dataset
    ResultHandler
    DefaultHandler
    PassthroughHandler
@@ -13,6 +14,7 @@
 """
 
 __all__ = [
+    'Dataset',
     'DefaultHandler',
     'ResultHandler',
     'PassthroughHandler',
@@ -22,6 +24,7 @@ __all__ = [
 ]
 
 
+from .dataset import Dataset
 from .decorator import datalad_command
 from .default_result_handler import (
     DefaultHandler,

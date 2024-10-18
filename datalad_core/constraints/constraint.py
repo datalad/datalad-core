@@ -59,7 +59,6 @@ class Constraint(ABC):
         """
 
     @property
-    @abstractmethod
     def input_description(self) -> str:
         """Returns full description of valid input for a constraint
 
@@ -79,6 +78,7 @@ class Constraint(ABC):
         data types. Tailored documentation can be provided via the
         ``WithDescription`` wrapper.
         """
+        return self.input_synopsis
 
     # TODO: also have these for AnyOf and AllOf
     #    def for_dataset(self, dataset: DatasetParameter) -> Constraint:

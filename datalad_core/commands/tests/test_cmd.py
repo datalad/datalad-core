@@ -9,9 +9,15 @@ from datalad_core.commands.default_result_handler import (
     get_default_result_handler,
     set_default_result_handler,
 )
+from datalad_core.commands.param_constraint import ParamSetConstraint
+from datalad_core.commands.preproc import JointParamProcessor
 from datalad_core.commands.result_handler import (
     PassthroughHandler,
     ResultHandler,
+)
+from datalad_core.constraints import (
+    Constraint,
+    ConstraintError,
 )
 
 
@@ -115,6 +121,64 @@ def test_testcmd_default_result_handler_on_failure():
     assert e.value.failed == failed[:1]
 
     assert list(test_command(on_failure='ignore')) == test_results
+
+
+def test_testcmd_preproc():
+    class EnsureInt(Constraint):
+        input_synopsis = 'make INT'
+
+        def __call__(self, val):
+            try:
+                return int(val)
+            except (TypeError, ValueError) as e:
+                self.raise_for(val, str(e))
+
+    class NotEqual(ParamSetConstraint):
+        input_synopsis = 'not all equal'
+
+        def __call__(self, val):
+            vals = [val[p] for p in self.param_names]
+            if len(vals) != len(set(vals)):
+                self.raise_for(
+                    val,
+                    'not all unique',
+                )
+            return val
+
+    @datalad_command(
+        preproc=JointParamProcessor(
+            {
+                'p2': EnsureInt(),
+            },
+            paramset_constraints=[NotEqual(('p1', 'p2'), aspect='identity')],
+        ),
+        postproc_cls=PassthroughHandler,
+    )
+    def test_command(p1, p2):
+        return (p1, p2)
+
+    test_case = ('5', '6')
+    assert test_command(*test_case) == ('5', 6)
+
+    # does not somehow shadow missing args
+    with pytest.raises(
+        TypeError,
+        match='missing 1 required positional argument.*p2',
+    ):
+        test_command('5')
+
+    with pytest.raises(
+        ConstraintError,
+        match='not all unique',
+    ):
+        # will be equal after first-level constraint processing
+        test_command(5, '5')
+
+    with pytest.raises(
+        ConstraintError,
+        match='invalid literal for int',
+    ):
+        test_command('5', 'five')
 
 
 def test_default_handler_set():

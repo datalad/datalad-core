@@ -24,18 +24,28 @@ classes.
    :toctree: generated
 
    datalad_command
-   Dataset
    ResultHandler
    StandardResultHandler
    PassthroughHandler
    get_default_result_handler
    set_default_result_handler
+   Dataset
+   ParamProcessor
+   JointParamProcessor
+   ParamConstraintContext
+   ParamErrors
+   ParamSetConstraint
 """
 
 __all__ = [
     'Dataset',
     'StandardResultHandler',
     'ResultHandler',
+    'ParamProcessor',
+    'JointParamProcessor',
+    'ParamConstraintContext',
+    'ParamErrors',
+    'ParamSetConstraint',
     'PassthroughHandler',
     'datalad_command',
     'get_default_result_handler',
@@ -49,6 +59,15 @@ from .default_result_handler import (
     StandardResultHandler,
     get_default_result_handler,
     set_default_result_handler,
+)
+from .exceptions import (
+    ParamConstraintContext,
+    ParamErrors,
+)
+from .param_constraint import ParamSetConstraint
+from .preproc import (
+    JointParamProcessor,
+    ParamProcessor,
 )
 from .result_handler import (
     PassthroughHandler,

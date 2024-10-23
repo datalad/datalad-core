@@ -81,6 +81,10 @@ class Repo(GitManaged):
                     'datalad-branch': dlbranch,
                 },
             )
+            # the local scope is fully controlled by the executing user.
+            # the 'datalad-branch' on the other hand can update with any merge
+            # based on external changes. This is not protected.
+            lman.declare_source_protected('git-local')
             self._config = lman
         return self._config
 

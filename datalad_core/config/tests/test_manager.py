@@ -2,11 +2,16 @@ from os import environ
 
 import pytest
 
-from datalad_core.config import get_manager
+from datalad_core.config import (
+    ConfigItem,
+    UnsetValue,
+    get_manager,
+)
 from datalad_core.repo import (
     Repo,
     Worktree,
 )
+from datalad_core.tests.fixtures import magic_marker
 
 
 def test_manager_setup():
@@ -90,3 +95,42 @@ def test_manager_fordataset(gitrepo):
 def test_manager_forbaredataset(baregitrepo):
     dm = Repo(baregitrepo).config
     assert dm['core.bare'].value is True
+
+
+@pytest.mark.usefixtures('cfgman')
+def test_manager_protected_query(gitrepo):
+    cm = Worktree(gitrepo).config
+    with pytest.raises(
+        ValueError,
+        match='not a known configuration source',
+    ):
+        cm.declare_source_protected('bogus')
+
+    test_key = 'test.key'
+    test_value = ConfigItem('test_value')
+    assert test_key not in cm
+    cm.sources['datalad-branch'][test_key] = test_value
+    assert test_key in cm
+    assert cm[test_key] == test_value
+    assert cm.get(test_key) == test_value
+
+    # but 'datalad-branch is not in protected scope
+    assert cm.get_from_protected_sources(test_key).value is None
+    # we can get something that lives in the global scope
+    assert (
+        cm.get_from_protected_sources('datalad.magic.test-marker').value == magic_marker
+    )
+
+    # if we set the value in a source that is protected, we can see it
+    cm.sources['git-global'][test_key] = test_value
+
+    assert cm.get_from_protected_sources(test_key) == test_value
+
+    # test that default reporting works, when only `UnsetValue`
+    # is recorded
+    cm.sources['git-global'][test_key] = ConfigItem(UnsetValue)
+    assert cm.get_from_protected_sources(test_key, default=5) == ConfigItem(5)
+
+    # override at a higher scope to test updating
+    cm.sources['git-local'][test_key] = test_value
+    assert cm.get_from_protected_sources(test_key) == test_value

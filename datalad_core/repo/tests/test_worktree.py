@@ -17,8 +17,10 @@ def test_worktree(gitrepo):
     # only in repr()
     assert 'DataladBranchConfig' in repr(wt.config)
 
-    # main worktree shares config manager with repo
-    assert wt.config is wt.repo.config
+    # main worktree does not shares config manager with repo
+    # (at least the datalad branch config sources is pointing
+    # to the worktree, not the repo directly)
+    assert wt.config is not wt.repo.config
     assert wt.config['core.bare'].value is False
     assert wt.path is gitrepo
     assert wt.repo.path != wt.path
@@ -42,7 +44,9 @@ def test_secondary_worktree(gitrepo):
     wt2 = Worktree(wt_path)
     # and the repo is represented by the very same instance
     assert wt1.repo is wt2.repo
-    assert wt1.config is wt2.config is wt1.repo.config
+    # but all config managers are slightly different
+    assert wt1.config is not wt2.config
+    assert wt1.config is not wt1.repo.config
 
     # now enable a dedicated worktree config
     wt1.config.sources['git-local'][

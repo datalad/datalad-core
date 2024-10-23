@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from datalad_core.constraints import Constraint
 from datalad_core.repo import (
     Repo,
     Worktree,
@@ -160,6 +161,80 @@ class Dataset:
 
     def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.pristine_spec!r})'
+
+
+class EnsureDataset(Constraint):
+    """Ensure an absent/present `Dataset` from any path or Dataset instance
+
+    Regardless of the nature of the input (`Dataset` instance or local path)
+    a resulting instance (if it can be created) is optionally tested for
+    absence or presence on the local file system.
+
+    Due to the particular nature of the `Dataset` class (the same instance
+    is used for a unique path), this constraint returns a `DatasetParameter`
+    rather than a `Dataset` directly. Consuming commands can discover
+    the original parameter value via its `original` property, and access a
+    `Dataset` instance via its `ds` property.
+
+    In addition to any value representing an explicit path, this constraint
+    also recognizes the special value `None`. This instructs the implementation
+    to find a dataset that contains the process working directory (PWD).
+    Such a dataset need not have its root at PWD, but could be located in
+    any parent directory too. If no such dataset can be found, PWD is used
+    directly. Tests for ``installed`` are performed in the same way as with
+    an explicit dataset location argument. If `None` is given and
+    ``installed=True``, but no dataset is found, an exception is raised
+    (this is the behavior of the ``required_dataset()`` function in
+    the DataLad core package). With ``installed=False`` no exception is
+    raised and a dataset instances matching PWD is returned.
+    """
+
+    def __init__(self, installed: bool | str | None = None):
+        """
+        Parameters
+        ----------
+        installed: bool, optional
+          If given, a dataset will be verified to be installed or not.
+          Otherwise the installation-state will not be inspected.
+        """
+        self._installed = installed
+        super().__init__()
+
+    @property
+    def input_synopsis(self) -> str:
+        return '(path to) {}dataset'.format(
+            'an existing '
+            if self._installed
+            else 'a non-existing '
+            if self._installed is False
+            else 'a '
+        )
+
+    def __call__(self, value) -> Dataset:
+        ds = Dataset(value)
+        try:
+            # resolve
+            ds.path  # noqa: B018
+        except (ValueError, TypeError) as e:
+            self.raise_for(
+                value,
+                'cannot create Dataset from {type}: {__caused_by__}',
+                type=type(value),
+                __caused_by__=e,
+            )
+        if self._installed is False and (ds.worktree or ds.repo):
+            self.raise_for(ds, 'already exists locally')
+        if self._installed and not (ds.worktree or ds.repo):
+            self.raise_for(ds, 'not installed')
+        if self._installed != 'with-id':
+            return ds
+
+        to_query = ds.worktree or ds.repo
+        if TYPE_CHECKING:
+            assert to_query is not None
+        if 'datalad.dataset.id' not in to_query.config.sources['datalad-branch']:
+            self.raise_for(ds, 'does not have a datalad-id')
+        return ds
 
 
 def get_gitmanaged_from_pathlike(cls, path):

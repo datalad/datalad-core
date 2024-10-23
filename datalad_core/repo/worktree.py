@@ -11,6 +11,7 @@ from datasalad.settings import Settings
 from datalad_core.config import (
     ConfigItem,
     ConfigManager,
+    DataladBranchConfig,
     WorktreeGitConfig,
 )
 from datalad_core.repo.annex import Annex
@@ -67,32 +68,37 @@ class Worktree(GitManaged):
 
         """
         if self._config is None:
+            # we always need to point the branch config to the worktree,
+            # compared to a repo manager
+            dlbranch = DataladBranchConfig(self.path)
+            dlbranch.item_type = ConfigItem
             rman = self.repo.config
             if rman.get('extensions.worktreeConfig', False).value is False:
-                # worktree config extension is not enabled, we can simply
-                # reuse the repo manager with its local scope
-                self._config = self.repo.config
-                return self._config
-
-            wt = WorktreeGitConfig(self.path)
-            wt.item_type = ConfigItem
-            # we want to bypass all the source creations in the constructor,
-            # and instead reuse them here to get cheap synchronization with
-            # a "parent" manager
-            lman = Settings.__new__(ConfigManager)
-            Settings.__init__(
-                lman,
-                {
+                srcs = {
+                    'git-command': rman.sources['git-command'],
+                    'git-local': rman.sources['git-local'],
+                    'git-global': rman.sources['git-global'],
+                    'git-system': rman.sources['git-system'],
+                    'datalad-branch': dlbranch,
+                    'defaults': rman.sources['defaults'],
+                }
+            else:
+                wt = WorktreeGitConfig(self.path)
+                wt.item_type = ConfigItem
+                srcs = {
                     'git-command': rman.sources['git-command'],
                     'git-worktree': wt,
                     'git-local': rman.sources['git-local'],
                     'git-global': rman.sources['git-global'],
                     'git-system': rman.sources['git-system'],
-                    'datalad-branch': rman.sources['datalad-branch'],
+                    'datalad-branch': dlbranch,
                     'defaults': rman.sources['defaults'],
-                },
-            )
-
+                }
+            # we want to bypass all the source creations in the constructor,
+            # and instead reuse them here to get cheap synchronization with
+            # a "parent" manager
+            lman = Settings.__new__(ConfigManager)
+            Settings.__init__(lman, srcs)
             self._config = lman
         return self._config
 

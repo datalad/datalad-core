@@ -51,6 +51,10 @@ class GitConfig(CachingSource):
     # directory from leaking configuration into the output.
     _nul = 'b:\\nul' if os_name == 'nt' else '/dev/null'
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._sources: set[str | Path] = set()
+
     def __str__(self) -> str:
         if not self._sources:
             return self.__class__.__name__
@@ -70,7 +74,7 @@ class GitConfig(CachingSource):
 
     def _reinit(self) -> None:
         super()._reinit()
-        self._sources: set[str | Path] = set()
+        self._sources = set()
 
     def _load(self) -> None:
         cwd = self._get_git_config_cwd() or Path.cwd()

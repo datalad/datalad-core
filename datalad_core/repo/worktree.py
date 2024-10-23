@@ -95,6 +95,13 @@ class Worktree(GitManaged):
                 defaults=rman.sources['defaults'],
                 sources=srcs,
             )
+            # the local/worktree scope is fully controlled by the executing
+            # user.
+            # the 'datalad-branch' on the other hand can update with any merge
+            # based on external changes. This is not protected.
+            lman.declare_source_protected('git-local')
+            if 'git-worktree' in lman.sources:
+                lman.declare_source_protected('git-worktree')
             self._config = lman
         return self._config
 

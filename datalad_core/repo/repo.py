@@ -9,7 +9,6 @@ from weakref import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-from datasalad.settings import Settings
 
 from datalad_core.config import (
     ConfigItem,
@@ -72,19 +71,14 @@ class Repo(GitManaged):
             dlbranch = DataladBranchConfig(self.path)
             for s in (loc, dlbranch):
                 s.item_type = ConfigItem
-            # we want to bypass all the source creations in the constructor,
-            # and instead reuse them here to get cheap synchronization with
-            # a "parent" manager
-            lman = Settings.__new__(ConfigManager)
-            Settings.__init__(
-                lman,
-                {
+            lman = ConfigManager(
+                defaults=gman.sources['defaults'],
+                sources={
                     'git-command': gman.sources['git-command'],
                     'git-local': loc,
                     'git-global': gman.sources['git-global'],
                     'git-system': gman.sources['git-system'],
                     'datalad-branch': dlbranch,
-                    'defaults': gman.sources['defaults'],
                 },
             )
             self._config = lman

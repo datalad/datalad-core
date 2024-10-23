@@ -12,6 +12,8 @@ if TYPE_CHECKING:
         Hashable,
     )
 
+    from datasalad.settings import Source
+
 from datasalad.settings import (
     Setting,
     Settings,
@@ -33,26 +35,34 @@ from datalad_core.config.item import ConfigItem
 class ConfigManager(Settings):
     """Multi-source (scope) configuration manager
 
-    This manager utilizes a fixed (order) collection of source (from
-    highest to lowest precedence):
+    By default (``source=None``), a manager utilizes a fixed (order) collection
+    of sources (from highest to lowest precedence):
 
     - ``git-command``: :class:`GitEnvironment`
     - ``git-global``: :class:`GlobalGitConfig`
     - ``git-system``: :class:`SystemGitConfig`
     - ``defaults``: :class:`ImplementationDefaults`
+
+    If a different source collection is desired, it can be given as
+    ``sources``.  The ``default`` source will be added to the given sources.
     """
 
-    def __init__(self, defaults: ImplementationDefaults):
-        super().__init__(
-            {
+    def __init__(
+        self,
+        defaults: ImplementationDefaults,
+        # TODO: should be Mapping[str, Source] | None
+        sources: dict[str, Source] | None = None,
+    ):
+        if sources is None:
+            sources = {
                 # call this one 'command', because that is what Git calls the
                 # scope of items pulled from the process environment
                 'git-command': GitEnvironment(),
                 'git-global': GlobalGitConfig(),
                 'git-system': SystemGitConfig(),
-                'defaults': defaults,
             }
-        )
+        sources['defaults'] = defaults
+        super().__init__(sources)
         # set .item_type for all sources, such that any plain default
         # comes back wrapped in the same item type
         for s in self.sources.values():

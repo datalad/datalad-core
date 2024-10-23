@@ -6,7 +6,6 @@ from weakref import WeakValueDictionary
 if TYPE_CHECKING:
     from pathlib import Path
 
-from datasalad.settings import Settings
 
 from datalad_core.config import (
     ConfigItem,
@@ -80,7 +79,6 @@ class Worktree(GitManaged):
                     'git-global': rman.sources['git-global'],
                     'git-system': rman.sources['git-system'],
                     'datalad-branch': dlbranch,
-                    'defaults': rman.sources['defaults'],
                 }
             else:
                 wt = WorktreeGitConfig(self.path)
@@ -92,13 +90,11 @@ class Worktree(GitManaged):
                     'git-global': rman.sources['git-global'],
                     'git-system': rman.sources['git-system'],
                     'datalad-branch': dlbranch,
-                    'defaults': rman.sources['defaults'],
                 }
-            # we want to bypass all the source creations in the constructor,
-            # and instead reuse them here to get cheap synchronization with
-            # a "parent" manager
-            lman = Settings.__new__(ConfigManager)
-            Settings.__init__(lman, srcs)
+            lman = ConfigManager(
+                defaults=rman.sources['defaults'],
+                sources=srcs,
+            )
             self._config = lman
         return self._config
 

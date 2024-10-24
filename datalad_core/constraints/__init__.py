@@ -40,6 +40,7 @@ and/or error message template).
    ConstraintError
    WithDescription
    NoConstraint
+   EnsureChoice
 """
 
 __all__ = [
@@ -47,12 +48,14 @@ __all__ = [
     'AllOf',
     'AnyOf',
     'ConstraintError',
+    'EnsureChoice',
     'WithDescription',
     'NoConstraint',
 ]
 
 
 from .basic import (
+    EnsureChoice,
     NoConstraint,
 )
 from .constraint import (

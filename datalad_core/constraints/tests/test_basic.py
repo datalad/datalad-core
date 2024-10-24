@@ -1,6 +1,7 @@
 import pytest
 
 from datalad_core.constraints.basic import (
+    EnsureChoice,
     EnsureMappingtHasKeys,
     NoConstraint,
 )
@@ -12,6 +13,20 @@ def test_noconstraint():
     assert not c.input_synopsis
     test_val = 5
     assert c(test_val) is test_val
+
+
+def test_ensurechoice():
+    c = EnsureChoice('choice1', 'choice2', None)
+    assert c.input_synopsis == "one of {'choice1','choice2',None}"
+    assert str(c) == f'Constraint[{c.input_synopsis}]'
+    # this should always work
+    assert c('choice1') == 'choice1'
+    assert c(None) is None
+    # this should always fail
+    with pytest.raises(ValueError, match='is not one of'):
+        c('fail')
+    with pytest.raises(ValueError, match='is not one of'):
+        c('None')
 
 
 def test_ensuremappinghaskeys():

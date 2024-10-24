@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import (
+    Mapping,
+)
 from typing import Any
 
 from datalad_core.constraints.constraint import Constraint
@@ -15,6 +17,32 @@ class NoConstraint(Constraint):
 
     def __call__(self, value):
         return value
+
+
+class EnsureChoice(Constraint):
+    """Ensure an input is element of a set of possible values"""
+
+    def __init__(self, *values: Any):
+        self._choices = tuple(values)
+        super().__init__()
+
+    @property
+    def choices(self) -> tuple[Any]:
+        """Returns the possible choice values"""
+        return self._choices
+
+    def __call__(self, value):
+        if value not in self.choices:
+            self.raise_for(
+                value,
+                'is not one of {allowed}',
+                allowed=self.choices,
+            )
+        return value
+
+    @property
+    def input_synopsis(self):
+        return f"one of {{{','.join([repr(c) for c in self.choices])}}}"
 
 
 class EnsureMappingtHasKeys(Constraint):

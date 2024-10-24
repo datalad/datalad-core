@@ -39,6 +39,7 @@ and/or error message template).
    AnyOf
    ConstraintError
    WithDescription
+   NoConstraint
 """
 
 __all__ = [
@@ -47,9 +48,13 @@ __all__ = [
     'AnyOf',
     'ConstraintError',
     'WithDescription',
+    'NoConstraint',
 ]
 
 
+from .basic import (
+    NoConstraint,
+)
 from .constraint import (
     AllOf,
     AnyOf,

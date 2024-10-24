@@ -50,9 +50,21 @@ class PathBasedFlyweight(type):
                 # let generic code fiddle with them to preserve any and
                 # all semantics of the instantiated class
                 instance = type.__call__(cls, path)
+                # a particular class might resolve the input path parameter
+                # to a different one (think root path resolution). in this
+                # case we want to root the instance for that resolved path
+                # (if we have one), regardless of the given `id_`.
+                # TODO: ideally such a resolved path would already be given
+                # to this method. However, MIH does not immediately know
+                # how to wield the __new__ magic to achieve that. Doing the
+                # hack below should be rather cheap...for now.
+                if instance.path in cls._unique_instances:  # type: ignore
+                    return cls._unique_instances[instance.path]  # type: ignore
                 # ignore typing, because MIH does not know how to say that
-                # `cls` is required to have a particular class attribute
-                cls._unique_instances[id_] = instance  # type: ignore
+                # `cls` is required to have a particular class attribute.
+                # we use the (resolved) path of the created instance as an
+                # ID for future comparison.
+                cls._unique_instances[instance.path] = instance  # type: ignore
 
         return instance
 
@@ -82,3 +94,8 @@ class Flyweighted:
         This test runs on every object creation and should be kept as cheap as
         possible.
         """
+
+    @property
+    @abstractmethod
+    def path(self) -> Path:
+        """Absolute path representative of the instance"""

@@ -46,11 +46,11 @@ def test_work_error(tmp_path):
         Worktree(test_file)
 
 
-def test_secondary_worktree(gitrepo):
+def test_secondary_worktree(tmp_path, gitrepo):
     test_key = 'brand.new.key'
     test_key2 = 'other.brand.new.key'
     branch = 'dummy'
-    wt_path = gitrepo.parent / branch
+    wt_path = tmp_path / branch
     call_git(
         [
             '-C',

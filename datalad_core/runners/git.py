@@ -195,10 +195,10 @@ def call_git_oneline(
     Raises
     ------
     CommandError if the call exits with a non-zero status.
-    AssertionError if there is more than one line of output.
+    AssertionError if there is not exactly one line of output.
     """
     lines = call_git_lines(args, cwd=cwd, inputs=inputs, force_c_locale=force_c_locale)
-    if len(lines) > 1:
+    if len(lines) != 1:
         msg = f'Expected Git {args} to return a single line, but got {lines}'
         raise AssertionError(msg)
     return lines[0]

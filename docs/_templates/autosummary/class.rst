@@ -7,4 +7,4 @@
    :inherited-members:
    :undoc-members:
    :show-inheritance:
-   :special-members: __eq__
+   :special-members: __eq__,__call__

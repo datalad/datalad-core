@@ -30,6 +30,7 @@ classes.
    get_default_result_handler
    set_default_result_handler
    Dataset
+   EnsureDataset
    ParamProcessor
    JointParamProcessor
    ParamConstraintContext
@@ -39,6 +40,7 @@ classes.
 
 __all__ = [
     'Dataset',
+    'EnsureDataset',
     'StandardResultHandler',
     'ResultHandler',
     'ParamProcessor',
@@ -53,7 +55,10 @@ __all__ = [
 ]
 
 
-from .dataset import Dataset
+from .dataset import (
+    Dataset,
+    EnsureDataset,
+)
 from .decorator import datalad_command
 from .default_result_handler import (
     StandardResultHandler,

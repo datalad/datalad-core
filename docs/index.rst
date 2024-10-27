@@ -1,8 +1,8 @@
 The `datalad-core` documentation
 ================================
 
-Package overview
-----------------
+Package API overview
+--------------------
 
 Also see the :ref:`modindex`.
 
@@ -16,6 +16,12 @@ Also see the :ref:`modindex`.
    consts
    repo
    runners
+
+Implementation patterns
+-----------------------
+
+.. toctree::
+   patterns/dataset_paths
 
 
 Indices and tables

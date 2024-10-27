@@ -41,6 +41,8 @@ and/or error message template).
    WithDescription
    NoConstraint
    EnsureChoice
+   EnsureDatasetPath
+   EnsurePath
 """
 
 __all__ = [
@@ -51,6 +53,8 @@ __all__ = [
     'EnsureChoice',
     'WithDescription',
     'NoConstraint',
+    'EnsureDatasetPath',
+    'EnsurePath',
 ]
 
 
@@ -65,5 +69,9 @@ from .constraint import (
 )
 from .exceptions import (
     ConstraintError,
+)
+from .path import (
+    EnsureDatasetPath,
+    EnsurePath,
 )
 from .wrapper import WithDescription

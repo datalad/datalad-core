@@ -36,9 +36,15 @@ def test_call_git_lines():
 def test_call_git_oneline():
     line = call_git_oneline(['--version'])
     assert line.startswith('git version')
+    # raise when there is more than oneline
     with pytest.raises(AssertionError):
-        # TODO: may not yield multiple lines on all systems
-        call_git_oneline(['config', '-l'])
+        call_git_oneline(['rev-parse', '--git-dir', '--git-common-dir'])
+    # raise when there is no line
+    with pytest.raises(AssertionError):
+        call_git_oneline(
+            ['stripspace'],
+            inputs='',
+        )
 
 
 def test_iter_git_subproc():

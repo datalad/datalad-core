@@ -39,6 +39,10 @@ and/or error message template).
    AnyOf
    ConstraintError
    WithDescription
+   NoConstraint
+   EnsureChoice
+   EnsureDatasetPath
+   EnsurePath
 """
 
 __all__ = [
@@ -46,10 +50,18 @@ __all__ = [
     'AllOf',
     'AnyOf',
     'ConstraintError',
+    'EnsureChoice',
     'WithDescription',
+    'NoConstraint',
+    'EnsureDatasetPath',
+    'EnsurePath',
 ]
 
 
+from .basic import (
+    EnsureChoice,
+    NoConstraint,
+)
 from .constraint import (
     AllOf,
     AnyOf,
@@ -57,5 +69,9 @@ from .constraint import (
 )
 from .exceptions import (
     ConstraintError,
+)
+from .path import (
+    EnsureDatasetPath,
+    EnsurePath,
 )
 from .wrapper import WithDescription

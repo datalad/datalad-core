@@ -22,15 +22,35 @@ def test_worktree(gitrepo):
     # to the worktree, not the repo directly)
     assert wt.config is not wt.repo.config
     assert wt.config['core.bare'].value is False
-    assert wt.path is gitrepo
+    assert wt.path == gitrepo
     assert wt.repo.path != wt.path
 
+    # test resolve to root
+    test_path = wt.path / 'subdir'
+    test_path.mkdir()
+    wt_sub = Worktree(test_path)
+    assert wt_sub.path == wt.path
+    # and actually
+    assert wt_sub is wt
 
-def test_secondary_worktree(gitrepo):
+
+def test_work_error(tmp_path):
+    err_match = 'not point to an existing Git worktree/checkout'
+    with pytest.raises(ValueError, match=err_match):
+        Worktree(tmp_path)
+    with pytest.raises(ValueError, match=err_match):
+        Worktree(tmp_path / 'notexist')
+    test_file = tmp_path / 'afile'
+    test_file.touch()
+    with pytest.raises(ValueError, match=err_match):
+        Worktree(test_file)
+
+
+def test_secondary_worktree(tmp_path, gitrepo):
     test_key = 'brand.new.key'
     test_key2 = 'other.brand.new.key'
     branch = 'dummy'
-    wt_path = gitrepo.parent / branch
+    wt_path = tmp_path / branch
     call_git(
         [
             '-C',

@@ -1,6 +1,15 @@
 """Assorted common constants"""
 
+__all__ = [
+    'UnsetValue',
+    'DATALAD_DOTDIR_RELPATH',
+    'DATALAD_BRANCH_CONFIG_RELPATH',
+    'PRE_INIT_COMMIT_SHA',
+]
+
 from os.path import join as opj
+
+from datasalad.settings import UnsetValue
 
 DATALAD_DOTDIR_RELPATH = '.datalad'
 """Path to dataset directory with committed datalad-specific information

@@ -33,6 +33,11 @@ class Repo(GitManaged):
         """
         ``path`` is the path to an existing repository (Git dir).
         """
+        # perform a cheap test whether this even could be a Git repo
+        if not path.is_dir() or not (path / 'HEAD').exists():
+            msg = f'{path} does not point to an existing Git repository'
+            raise ValueError(msg)
+
         super().__init__(path)
         self.reset()
 

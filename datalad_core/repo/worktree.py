@@ -162,8 +162,19 @@ class Worktree(GitManaged):
         *,
         autoenable_remotes: bool = True,
     ) -> Annex:
-        """ """
-        # refuse for non-bare
+        """Initialize an annex in the repository associated with the worktree
+
+        This is done be calling ``git annex init``. If an annex already exists,
+        it will be reinitialized.
+
+        The ``description`` parameter can be used to label the annex.
+        Otherwise, git-annex will auto-generate a description based on
+        username, hostname and the path of the repository.
+
+        The boolean flag ``autoenable_remotes`` controls whether or not
+        git-annex should honor a special remote's configuration to get
+        auto-enable on initialization.
+        """
         init_annex_at(
             self.path,
             description=description,

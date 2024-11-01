@@ -1,6 +1,6 @@
-from shutil import rmtree
-
 import pytest
+
+from datalad_core.tests import rmtree
 
 from ..repo import Repo
 

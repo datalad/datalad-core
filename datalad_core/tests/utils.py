@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
         PurePath,
     )
 
-from shutil import rmtree
+from shutil import rmtree as shutil_rmtree
 
 from datalad_core.repo import Worktree
 from datalad_core.runners import (
@@ -149,3 +150,31 @@ def modify_dataset(path: Path) -> str:
     file_am_obj.write_text('modified')
 
     return modify_dataset_promise
+
+
+def _rmtree_onerror(func, path, exc_info):  # noqa: ARG001
+    """
+    Error handler for ``shutil.rmtree``.
+
+    If the error is due to an access error (read only file)
+    it attempts to add write permission and then retries.
+
+    If the error is for another reason it re-raises the error.
+    """
+    import stat
+
+    # Is the error an access error?
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        raise
+
+
+def rmtree(path: Path) -> None:
+    """``shutil.rmtree()`` with an error handler that sets write permissions"""
+    shutil_rmtree(
+        path,
+        # deprecated with PY3.12 -> onexc=
+        onerror=_rmtree_onerror,
+    )

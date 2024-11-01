@@ -11,8 +11,11 @@ from ..git import (
 
 
 def test_call_git():
-    # smoke test
-    call_git(['--version'])
+    # by default no output is captured
+    assert call_git(['--version']) is None
+    # capture gives bytes unless text=True
+    assert b'version' in call_git(['--version'], capture_output=True)
+    assert 'version' in call_git(['--version'], text=True, capture_output=True)
     # raises properly
     with pytest.raises(CommandError):
         call_git(['notacommand'])

@@ -76,8 +76,9 @@ def call_git(
     *,
     cwd: Path | None = None,
     force_c_locale: bool = False,
+    text: bool | None = None,
     capture_output: bool = False,
-) -> None:
+) -> str | bytes | None:
     """Call Git with no output capture, raises on non-zero exit.
 
     If ``cwd`` is not None, the function changes the working directory to
@@ -87,17 +88,26 @@ def call_git(
     is altered to ensure output according to the C locale. This is useful
     when output has to be processed in a locale invariant fashion.
 
-    If ``capture_output`` is ``True``, process output is captured. This is
-    necessary for reporting any error messaging via a ``CommandError`` exception.
-    By default process output is not captured.
+    If ``capture_output`` is ``True``, process output is captured (and not
+    relayed to the parent process/terminal). This is necessary for reporting
+    any error messaging via a ``CommandError`` exception.  By default process
+    output is not captured.
+
+    All other argument are pass on to ``subprocess.run()`` verbatim.
+
+    If ``capture_output`` is enabled, the captured STDOUT is returned as
+    ``str`` or ``bytes``, depending on the value of ``text``. Otherwise
+    ``None`` is returned to indicate that no output was captured.
     """
-    _call_git(
+    res = _call_git(
         args,
         capture_output=capture_output,
         cwd=cwd,
         check=True,
+        text=text,
         force_c_locale=force_c_locale,
     )
+    return res.stdout if capture_output else None
 
 
 def call_git_success(

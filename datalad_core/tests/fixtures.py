@@ -140,3 +140,24 @@ def annexrepo(gitrepo) -> Generator[Path]:
         capture_output=True,
     )
     return gitrepo
+
+
+@pytest.fixture(autouse=False, scope='session')
+def symlinks_supported(tmp_path_factory) -> bool:
+    """Returns whether creating symlinks is supported in test directories"""
+    testdir = tmp_path_factory.mktemp('symlink_check')
+    target = testdir / 'target'
+    source = testdir / 'source'
+    try:
+        target.touch()
+        source.symlink_to(target)
+    except Exception:  # noqa: BLE001
+        return False
+    return True
+
+
+@pytest.fixture(autouse=False, scope='function')  # noqa: PT003
+def skip_when_symlinks_not_supported(symlinks_supported):
+    if not symlinks_supported:
+        msg = 'skipped, symlinks are not supported in the test directory'
+        raise pytest.skip(msg)

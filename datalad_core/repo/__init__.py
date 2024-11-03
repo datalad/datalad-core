@@ -28,6 +28,8 @@ instance for the same path location.
    Worktree
    Annex
    BareRepoAnnex
+   WorktreeDirectory
+   WorktreeItem
 """
 
 __all__ = [
@@ -35,6 +37,8 @@ __all__ = [
     'Worktree',
     'Annex',
     'BareRepoAnnex',
+    'WorktreeDirectory',
+    'WorktreeItem',
 ]
 
 from .annex import (
@@ -43,3 +47,7 @@ from .annex import (
 )
 from .repo import Repo
 from .worktree import Worktree
+from .worktree_item import (
+    WorktreeDirectory,
+    WorktreeItem,
+)

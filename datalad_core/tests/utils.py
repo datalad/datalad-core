@@ -30,7 +30,16 @@ def call_git_addcommit(
         msg = 'done by call_git_addcommit()'
 
     call_git(['add'] + [str(p) for p in paths], cwd=cwd, capture_output=True)
-    call_git(['commit', '-m', msg], cwd=cwd, capture_output=True)
+    call_git(
+        [
+            'commit',
+            '--no-gpg-sign',
+            '-m',
+            msg,
+        ],
+        cwd=cwd,
+        capture_output=True,
+    )
 
 
 # Target `git status -uall --porcelain=v1` of `modify_dataset()` result

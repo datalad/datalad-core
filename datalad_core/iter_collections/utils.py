@@ -15,8 +15,12 @@ from datasalad.itertools import (
 from datalad_core.runners import iter_git_subproc
 
 
-def git_ls_files(path: Path, *args: str) -> Iterator[str]:
-    """Run ``git ls-files`` at a given ``path`` and with ``args``
+def iter_gitcmd_zlines(
+    path: Path,
+    cmd: str,
+    *args: str,
+) -> Iterator[str]:
+    """Run ``git <cmd>`` at a given ``path`` and with ``args``
 
     An unconditional ``-z`` argument is used to get zero-byte separation
     of output items, internally. A generator is returned that yields ``str``
@@ -24,7 +28,7 @@ def git_ls_files(path: Path, *args: str) -> Iterator[str]:
     """
     with iter_git_subproc(
         [
-            'ls-files',
+            cmd,
             # we rely on zero-byte splitting below
             '-z',
             # otherwise take whatever is coming in
@@ -37,6 +41,16 @@ def git_ls_files(path: Path, *args: str) -> Iterator[str]:
             sep='\0',
             keep_ends=False,
         )
+
+
+def git_ls_files(path: Path, *args: str) -> Iterator[str]:
+    """Run ``git ls-files`` at a given ``path`` and with ``args``"""
+    return iter_gitcmd_zlines(path, 'ls-files', *args)
+
+
+def git_ls_tree(path: Path, *args) -> Iterator[str]:
+    """Run ``git ls-tree`` at a given ``path`` and with ``args``"""
+    return iter_gitcmd_zlines(path, 'ls-tree', *args)
 
 
 # TODO: Could be `StrEnum`, came with PY3.11

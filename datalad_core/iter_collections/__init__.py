@@ -12,19 +12,18 @@ collections.
 .. autosummary::
    :toctree: generated
 
+   iter_gittree
    iter_gitworktree
-   GitTreeItemType
-   GitWorktreeItem
 """
 
 __all__ = [
-    'GitTreeItemType',
-    'GitWorktreeItem',
+    'iter_gittree',
     'iter_gitworktree',
 ]
 
+from .gittree import (
+    iter_gittree,
+)
 from .gitworktree import (
-    GitTreeItemType,
-    GitWorktreeItem,
     iter_gitworktree,
 )

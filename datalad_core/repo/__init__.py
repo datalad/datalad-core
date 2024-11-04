@@ -28,6 +28,9 @@ instance for the same path location.
    Worktree
    Annex
    BareRepoAnnex
+   GitTreeItem
+   GitTreeItemType
+   Treeish
    WorktreeDirectory
    WorktreeItem
 """
@@ -37,6 +40,9 @@ __all__ = [
     'Worktree',
     'Annex',
     'BareRepoAnnex',
+    'GitTreeItem',
+    'GitTreeItemType',
+    'Treeish',
     'WorktreeDirectory',
     'WorktreeItem',
 ]
@@ -46,6 +52,11 @@ from .annex import (
     BareRepoAnnex,
 )
 from .repo import Repo
+from .tree_item import (
+    GitTreeItem,
+    GitTreeItemType,
+    Treeish,
+)
 from .worktree import Worktree
 from .worktree_item import (
     WorktreeDirectory,

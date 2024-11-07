@@ -3,17 +3,18 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pathlib import (
-        Path,
-        PurePath,
-    )
+from pathlib import (
+    Path,
+    PurePath,
+    PurePosixPath,
+)
 
 from shutil import rmtree as shutil_rmtree
 
 from datalad_core.repo import Worktree
 from datalad_core.runners import (
     call_git,
+    call_git_oneline,
 )
 
 
@@ -40,6 +41,33 @@ def call_git_addcommit(
         cwd=cwd,
         capture_output=True,
     )
+
+
+def create_submodule(repo_path: Path, subm_relpath: PurePosixPath) -> Worktree:
+    """Create a new submodule inside an existing repository
+
+    The submodule is not cloned from some place, but created in-place. The "URL" will be a path pointing to the location of creation.
+
+    An empty `.gitkeep` file is created, to be able to make a non-empty initial commit. This commit is needed to register the new repository as a submodule in the parent repository.
+
+    No collision detection inside the parent repository is performed.
+    The submodule addition is staged, but not committed in the parent repository.
+
+    A :class:`Worktree` instance for the new submodule is returned.
+    """
+    repo_root = Path(call_git_oneline(['rev-parse', '--path-format=absolute', '--show-toplevel'], cwd=repo_path))
+    subm_path = repo_path / subm_relpath
+    subm_path.mkdir()
+    subm_wt = Worktree.init_at(subm_path)
+    # we need some content for a non-fancy commit
+    (subm_path / '.gitkeep').touch()
+    call_git_addcommit(subm_path)
+    call_git(
+        ['submodule', 'add', f'./{subm_path}', f'{subm_path.relative_to(repo_root)}'],
+        cwd=repo_root,
+        capture_output=True,
+    )
+    return subm_wt
 
 
 # Target `git status -uall --porcelain=v1` of `modify_dataset()` result
@@ -100,21 +128,12 @@ def modify_dataset(path: Path) -> str:
         'droppedsm_c',
     )
     for smname in smnames:
-        sds_path = dirsm / smname
-        sds_path.mkdir()
-        sds = Worktree.init_at(sds_path)
-        # we need some content for a commit
-        (sds_path / '.gitkeep').touch()
+        sds = create_submodule(dirsm, PurePosixPath(smname))
         # for the plain modification, commit the reference right here
         if smname in ('sm_m', 'sm_nm', 'sm_mu', 'sm_nmu'):
-            (sds_path / 'file_m').touch()
-        call_git_addcommit(sds_path)
+            (sds.path / 'file_m').touch()
+            call_git_addcommit(sds.path)
         dss[smname] = sds.path
-        call_git(
-            ['submodule', 'add', f'./{sds_path}', f'{sds_path.relative_to(path)}'],
-            cwd=path,
-            capture_output=True,
-        )
     # files in superdataset to be deleted
     for d in (ds_dir_d, ds_dir, path):
         (d / 'file_d').touch()

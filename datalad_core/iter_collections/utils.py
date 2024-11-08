@@ -71,3 +71,40 @@ git_mode_type_map = {
     '120000': GitTreeItemType.symlink,
     '160000': GitTreeItemType.submodule,
 }
+
+
+# TODO: Could be `StrEnum`, came with PY3.11
+class GitDiffStatus(Enum):
+    """Enumeration of statuses for diff items"""
+
+    addition = 'addition'
+    copy = 'copy'
+    deletion = 'deletion'
+    modification = 'modification'
+    rename = 'rename'
+    typechange = 'typechange'
+    unmerged = 'unmerged'
+    unknown = 'unknown'
+    # this is a local addition and not defined by git
+    # AKA "untracked"
+    other = 'other'
+
+
+git_diffstatus_map = {
+    'A': GitDiffStatus.addition,
+    'C': GitDiffStatus.copy,
+    'D': GitDiffStatus.deletion,
+    'M': GitDiffStatus.modification,
+    'R': GitDiffStatus.rename,
+    'T': GitDiffStatus.typechange,
+    'U': GitDiffStatus.unmerged,
+    'X': GitDiffStatus.unknown,
+    'O': GitDiffStatus.other,
+}
+
+
+# TODO: Could be `StrEnum`, came with PY3.11
+class GitContainerModificationType(Enum):
+    new_commits = 'new commits'
+    untracked_content = 'untracked content'
+    modified_content = 'modified content'

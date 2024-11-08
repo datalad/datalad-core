@@ -1,5 +1,6 @@
 __all__ = [
     'call_git_addcommit',
+    'create_submodule',
     'rmtree',
 ]
 

@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING
-
 from pathlib import (
     Path,
     PurePath,
     PurePosixPath,
 )
-
 from shutil import rmtree as shutil_rmtree
 
 from datalad_core.repo import Worktree
@@ -55,7 +52,11 @@ def create_submodule(repo_path: Path, subm_relpath: PurePosixPath) -> Worktree:
 
     A :class:`Worktree` instance for the new submodule is returned.
     """
-    repo_root = Path(call_git_oneline(['rev-parse', '--path-format=absolute', '--show-toplevel'], cwd=repo_path))
+    repo_root = Path(
+        call_git_oneline(
+            ['rev-parse', '--path-format=absolute', '--show-toplevel'], cwd=repo_path
+        )
+    )
     subm_path = repo_path / subm_relpath
     subm_path.mkdir()
     subm_wt = Worktree.init_at(subm_path)

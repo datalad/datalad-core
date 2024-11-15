@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 from weakref import (
     WeakValueDictionary,
@@ -7,8 +8,7 @@ from weakref import (
 )
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
+    from os import PathLike
 
 from datalad_core.config import (
     ConfigItem,
@@ -20,7 +20,10 @@ from datalad_core.config import (
 from datalad_core.repo.annex import BareRepoAnnex
 from datalad_core.repo.gitmanaged import GitManaged
 from datalad_core.repo.utils import init_annex_at
-from datalad_core.runners import call_git
+from datalad_core.runners import (
+    call_git,
+    call_git_oneline,
+)
 
 
 class Repo(GitManaged):
@@ -171,3 +174,18 @@ class Repo(GitManaged):
             capture_output=True,
         )
         return cls(path)
+
+    @classmethod
+    def from_path(cls, path: PathLike) -> Repo:
+        resolved_git_dir = call_git_oneline(
+            [
+                '-C',
+                str(path),
+                'rev-parse',
+                '--path-format=absolute',
+                # we use the common dir to get homogeneous results
+                # also for linked worktree paths
+                '--git-common-dir',
+            ]
+        )
+        return cls(Path(resolved_git_dir))

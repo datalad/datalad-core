@@ -71,7 +71,7 @@ version-file = "datalad_core/_version.py"
 
 [tool.hatch.envs.hatch-test]
 default-args = ["datalad_core"]
-extra-dependencies = [
+dependencies = [
   "pytest",
   # if you come here, because coverage combination crashed for you
   # run `hatch test --cover` and/or see
@@ -80,15 +80,15 @@ extra-dependencies = [
 ]
 
 
-[tool.hatch.envs.tests]
-description = "run tests across Python versions"
-template = "hatch-test"
-
-[[tool.hatch.envs.tests.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
-[tool.hatch.envs.tests.scripts]
-run = 'python -m pytest {args}'
+#[tool.hatch.envs.tests]
+#description = "run tests across Python versions"
+#template = "hatch-test"
+#
+#[[tool.hatch.envs.tests.matrix]]
+#python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+#
+#[tool.hatch.envs.tests.scripts]
+#run = 'python -m pytest {args}'
 
 [tool.hatch.envs.types]
 description = "type checking with MyPy"

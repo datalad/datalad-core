@@ -69,22 +69,18 @@ environment:
     - job_name: test-linux
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2204
       PY: 3.9
-      INSTALL_GITANNEX: git-annex -m snapshot
 
     # same as 'test-linux', but TMPDIR is on a crippled filesystem, causing
     # most, if not all test datasets to be created on that filesystem
     - job_name: test-linux-crippled
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2204
       PY: 3.9
-      # datalad-annex git remote needs something after git-annex_8.20211x
-      INSTALL_GITANNEX: git-annex -m snapshot
 
     # Windows core tests
     - job_name: test-win
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       # Python version specification is non-standard on windows
       PY: 3.12
-      INSTALL_GITANNEX: git-annex -m datalad/packages
       COVERAGE_ROOT: C:\DLTMP
       HATCH_DATA_DIR: C:\hatch-data-dir
       PIP_CACHE: C:\Users\appveyor\AppData\Local\pip\Cache
@@ -93,7 +89,6 @@ environment:
     - job_name: test-mac
       APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
       PY: 3.12
-      INSTALL_GITANNEX: git-annex
       COVERAGE_ROOT: /Users/appveyor/DLTMP
       HATCH_DATA_DIR: /Users/appveyor/hatch-data-dir
       PIP_CACHE: /Users/appveyor/.cache/pip
@@ -149,14 +144,10 @@ for:
       # verify that a PY variable is declared that identifies the desired Python version
       # for this run
       - "[ \"x$PY\" != x ]"
-      # Missing system software
-      - tools/appveyor/install-syspkgs $INSTALL_SYSPKGS
       # activate Python env solely to get `python` to become available consistently
       # hatch will manage the actual testing environment
       - '. ${HOME}/venv${PY}/bin/activate'
-      - tools/appveyor/install-git-annex ${INSTALL_GITANNEX}
-      # enable the git-annex provisioned by the installer
-      - "[ -f ${HOME}/dlinstaller_env.sh ] && . ${HOME}/dlinstaller_env.sh || true"
+
     test_script:
       # store original TMPDIR setting to limit modification to test execution
       - export PREV_TMPDIR=$TMPDIR
@@ -222,16 +213,6 @@ for:
       # place a debug setup helper at a convenient location
       - cmd: copy tools\appveyor\env_setup.bat C:\\datalad_debug.bat
       - cmd: "set PATH=C:\\Python%PY%;C:\\Python%PY%\\Scripts;%PATH%"
-      # deploy the datalad installer, override version via DATALAD_INSTALLER_VERSION
-      - cmd:
-          IF DEFINED DATALAD_INSTALLER_VERSION (
-          python -m pip install "datalad-installer%DATALAD_INSTALLER_VERSION%"
-          ) ELSE (
-          python -m pip install datalad-installer
-          )
-      # Install git-annex on windows, otherwise INSTALL_SYSPKGS can be used
-      # deploy git-annex, if desired
-      - cmd: IF DEFINED INSTALL_GITANNEX datalad-installer --sudo ok %INSTALL_GITANNEX%
 
     test_script:
       - cmd: 'hatch run tests.py%PY%:run-cov --doctest-modules --durations 10'

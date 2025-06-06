@@ -8,8 +8,9 @@
 # platforms and Python versions. The main difference between running tests
 # on Appveyor and locally should be the service setup (e.g., SSH, HTTPBIN).
 #
-# All workers support remote login. Login details are shown at the top of each
-# CI run log.
+# All workers support remote login (grep for LOGIN in this file to locate
+# the lines that enable it). Once enabled, login details are shown at the
+# top of each CI run log.
 #
 # - Linux/Mac workers (via SSH):
 #
@@ -50,48 +51,40 @@ shallow_clone: false
 build: off
 
 environment:
-  # place coverage files to a known location regardless of where a test run
-  # is happening
-  COVERAGE_ROOT: /home/appveyor/DLTMP
   # we pin hatch's data file to make it easy to cache it
   HATCH_DATA_DIR: /home/appveyor/hatch-data-dir
-  # same for pip
-  PIP_CACHE: /home/appveyor/.cache/pip
-  # Do not use `image` as a matrix dimension, to have fine-grained control over
-  # what tests run on which platform
-  # The ID variable had no impact, but sorts first in the CI run overview
-  # an intelligible name can help to locate a specific test run
+  UV_CACHE: /home/appveyor/.cache/uv
+  HATCH_ENV_TYPE_VIRTUAL_UV_PATH: /home/appveyor/.local/bin/uv
+  # oldest and newest supported, by default
+  TEST_SCRIPT: "hatch test -i py=3.9,3.13 --cover --doctest-modules --durations 10"
   matrix:
-    # List a CI run for each platform first, to have immediate access when there
-    # is a need for debugging
-
-    # Ubuntu core tests
     - job_name: test-linux
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2204
-      PY: 3.9
 
     # same as 'test-linux', but TMPDIR is on a crippled filesystem, causing
     # most, if not all test datasets to be created on that filesystem
     - job_name: test-linux-crippled
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2204
-      PY: 3.9
 
-    # Windows core tests
+    - job_name: test-mac
+      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      HATCH_DATA_DIR: /Users/appveyor/hatch-data-dir
+      HATCH_ENV_TYPE_VIRTUAL_UV_PATH: /Users/appveyor/.local/bin/uv
+      UV_CACHE: /Users/appveyor/.cache/pip
+
     - job_name: test-win
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       # Python version specification is non-standard on windows
-      PY: 3.12
-      COVERAGE_ROOT: C:\DLTMP
       HATCH_DATA_DIR: C:\hatch-data-dir
-      PIP_CACHE: C:\Users\appveyor\AppData\Local\pip\Cache
-
-    # MacOS core tests
-    - job_name: test-mac
-      APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-      PY: 3.12
-      COVERAGE_ROOT: /Users/appveyor/DLTMP
-      HATCH_DATA_DIR: /Users/appveyor/hatch-data-dir
-      PIP_CACHE: /Users/appveyor/.cache/pip
+      # make hatch use uv as an installer
+      HATCH_ENV_TYPE_VIRTUAL_UV_PATH: C:\Users\appveyor\.local\bin\uv.exe
+      # appveyor has a default path that comprises _everything_. here we trim
+      # it to the bare necessities to reduce using preinstalled software
+      # that changes without notice. importantly, we
+      # - reset the default python to be a 64bit one
+      # - include the installation target path for `uv`
+      CUSTOMPATH: C:\Users\\appveyor\.local\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Windows\system32;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\PowerShell\7;C:\Program Files\7-Zip;C:\Python312-x64;C:\Python312-x64\Scripts"
+      UV_CACHE: C:\Users\appveyor\AppData\Local\uv\cache
 
 
 # only run the CI if there are code or tooling changes
@@ -101,16 +94,6 @@ only_commits:
     - tools/
     - pyproject.toml
     - .appveyor.yml
-
-
-## tests need specific hostnames to be available
-## note, this is insufficient on MacOS, and needs to be reflected
-## in the SSH config too
-#hosts:
-#  datalad-test-sshd: 127.0.0.1
-#  # same, but for datalad-core implementations
-#  datalad-test: 127.0.0.1
-
 
 # job-specific configurations
 for:
@@ -125,28 +108,21 @@ for:
 
     cache:
       # pip cache
-      - "${PIP_CACHE} -> .appveyor.yml"
-      # hatch-managed python versions
-      - "${HATCH_DATA_DIR}/env/virtual/.pythons -> pyproject.toml"
+      - "${UV_CACHE} -> .appveyor.yml"
 
     # init cannot use any components from the repo, because it runs prior to
     # cloning it
     init:
-      # enable external SSH access to CI worker
+      # LOGIN: enable external SSH access to CI worker
       # needs APPVEYOR_SSH_KEY defined in project settings (or environment)
-      - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+      #- curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+      # install `uv`
+      - curl -LsSf https://astral.sh/uv/install.sh | sh
+      - source $HOME/.local/bin/env
       # Scratch space
       # we place the "unix" one into the user's HOME to avoid git-annex issues on MacOSX
       # gh-5291
       - mkdir ~/DLTMP && export TMPDIR=~/DLTMP
-
-    install:
-      # verify that a PY variable is declared that identifies the desired Python version
-      # for this run
-      - "[ \"x$PY\" != x ]"
-      # activate Python env solely to get `python` to become available consistently
-      # hatch will manage the actual testing environment
-      - '. ${HOME}/venv${PY}/bin/activate'
 
     test_script:
       # store original TMPDIR setting to limit modification to test execution
@@ -156,8 +132,8 @@ for:
       - |
         set -e
         if [ "$APPVEYOR_JOB_NAME" = "test-linux-crippled" ]; then
-          # 100 MB VFAT FS in a box
-          sudo dd if=/dev/zero of=/crippledfs.img count=100 bs=1M
+          # 200 MB VFAT FS in a box
+          sudo dd if=/dev/zero of=/crippledfs.img count=200 bs=1M
           sudo mkfs.vfat /crippledfs.img
           sudo mkdir /crippledfs
           sudo mount -o "uid=$(id -u),gid=$(id -g)" /crippledfs.img /crippledfs
@@ -167,17 +143,11 @@ for:
           export TMPDIR=/crippledfs
         fi
       - echo TMPDIR=$TMPDIR
-      - 'hatch run tests.py${PY}:run-cov --doctest-modules --durations 10'
-
-    after_test:
-      - 'hatch run tests.py${PY}:cov-combine'
-      - 'hatch run tests.py${PY}:coverage xml'
-      - 'codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-$APPVEYOR_JOB_NAME" --disable-search -f coverage.xml'
+      - "$TEST_SCRIPT"
 
     on_finish:
       # conditionally block the exit of a CI run for direct debugging
       - while [ -f ~/BLOCK ]; do sleep 5; done
-
 
   #
   # WINDOWS TEST RUNS
@@ -186,41 +156,33 @@ for:
       only:
         - job_name: test-win
     cache:
-      # pip cache
-      - "%PIP_CACHE% -> .appveyor.yml"
+      - "%UV_CACHE% -> .appveyor.yml"
       # hatch-managed python versions
       - "%HATCH_DATA_DIR%\\env\\virtual\\.pythons -> pyproject.toml"
 
     # init cannot use any components from the repo, because it runs prior to
     # cloning it
     init:
+      # LOGIN: enable RDP access on windows (RDP password is in appveyor project config)
+      # this is relatively expensive (1-2min), but very convenient to jump into any build at any time
+      #- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      - cmd: "set PATH=%CUSTOMPATH%"
+      # install `uv`
+      - cmd: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
       # remove windows 260-char limit on path names
       - ps: Set-Itemproperty -path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled -value 1
-      # enable developer mode on windows
-      # this should enable mklink without admin privileges, but it doesn't seem to work
-      #- ps: tools\ci\appveyor_enable_windevmode.ps1
-      # enable RDP access on windows (RDP password is in appveyor project config)
-      # this is relatively expensive (1-2min), but very convenient to jump into any build at any time
-      - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
       # Scratch space
       - cmd: md C:\DLTMP
       # and use that scratch space to get short paths in test repos
       # (avoiding length-limits as much as possible)
-      - cmd: "set TMP=C:\\DLTMP"
-      - cmd: "set TEMP=C:\\DLTMP"
+      - cmd: "set TMP=C:\\DLTMP & set TEMP=C:\\DLTMP"
 
     install:
       # place a debug setup helper at a convenient location
       - cmd: copy tools\appveyor\env_setup.bat C:\\datalad_debug.bat
-      - cmd: "set PATH=C:\\Python%PY%;C:\\Python%PY%\\Scripts;%PATH%"
 
     test_script:
-      - cmd: 'hatch run tests.py%PY%:run-cov --doctest-modules --durations 10'
-
-    after_test:
-      - cmd: 'hatch run tests.py%PY%:cov-combine'
-      - cmd: 'hatch run tests.py%PY%:coverage xml'
-      - cmd: 'codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-%APPVEYOR_JOB_NAME%" --disable-search -f coverage.xml'
+      - cmd: "%TEST_SCRIPT%"
 
     on_finish:
       # conditionally block the exit of a CI run for direct debugging
@@ -231,9 +193,13 @@ for:
 # ALL TEST RUNS
 #
 build_script:
-  - python -m pip install hatch codecov-cli
+  - uv tool install hatch
+  - uv tool install codecov-cli
 
 after_build:
   # Identity setup
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
+
+after_test:
+  - codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-%APPVEYOR_JOB_NAME%" --disable-search -f .coverage

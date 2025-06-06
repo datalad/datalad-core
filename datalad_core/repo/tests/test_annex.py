@@ -57,7 +57,9 @@ def test_repo_init_annex_error(baregitrepo):
     repo = Repo(baregitrepo)
     # we take the place of the annex
     (repo.path / 'annex').touch()
-    with pytest.raises(CommandError, match='fileExist|file already exists'):
+    with pytest.raises(
+        CommandError, match='fileExist|file already exists|Not a directory'
+    ):
         repo.init_annex()
 
 

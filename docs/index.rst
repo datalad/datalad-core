@@ -14,6 +14,7 @@ Also see the :ref:`modindex`.
    config
    constraints
    consts
+   iter_collections
    repo
    runners
 

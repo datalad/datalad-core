@@ -43,7 +43,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "datasalad >= 0.4.0",
+  #"datasalad >= 0.4.0",
+  "datasalad @ git+https://github.com/datalad/datasalad",
 ]
 
 [tool.hatch.metadata]

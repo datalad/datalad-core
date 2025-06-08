@@ -51,6 +51,9 @@ shallow_clone: false
 build: off
 
 environment:
+  # place coverage files to a known location regardless of where a test run
+  # is happening. also ensures proper report path configurations for codecov
+  COVERAGE_ROOT: /home/appveyor/DLTMP
   # we pin hatch's data file to make it easy to cache it
   HATCH_DATA_DIR: /home/appveyor/hatch-data-dir
   UV_CACHE: /home/appveyor/.cache/uv
@@ -68,12 +71,14 @@ environment:
 
     - job_name: test-mac
       APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
+      COVERAGE_ROOT: /Users/appveyor/DLTMP
       HATCH_DATA_DIR: /Users/appveyor/hatch-data-dir
       HATCH_ENV_TYPE_VIRTUAL_UV_PATH: /Users/appveyor/.local/bin/uv
       UV_CACHE: /Users/appveyor/.cache/pip
 
     - job_name: test-win
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      COVERAGE_ROOT: C:\DLTMP
       # Python version specification is non-standard on windows
       HATCH_DATA_DIR: C:\hatch-data-dir
       # make hatch use uv as an installer
@@ -145,6 +150,10 @@ for:
       - echo TMPDIR=$TMPDIR
       - "$TEST_SCRIPT"
 
+    after_test:
+      - coverage xml
+      - codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-${APPVEYOR_JOB_NAME}" --disable-search -f coverage.xml
+
     on_finish:
       # conditionally block the exit of a CI run for direct debugging
       - while [ -f ~/BLOCK ]; do sleep 5; done
@@ -184,6 +193,10 @@ for:
     test_script:
       - cmd: "%TEST_SCRIPT%"
 
+    after_test:
+      - coverage xml
+      - codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-%APPVEYOR_JOB_NAME%" --disable-search -f coverage.xml
+
     on_finish:
       # conditionally block the exit of a CI run for direct debugging
       - ps: while ((Test-Path "C:\Users\\appveyor\\Desktop\\BLOCK.txt")) { Start-Sleep 5 }
@@ -195,11 +208,9 @@ for:
 build_script:
   - uv tool install hatch
   - uv tool install codecov-cli
+  - uv tool install coverage
 
 after_build:
   # Identity setup
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
-
-after_test:
-  - codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-%APPVEYOR_JOB_NAME%" --disable-search -f .coverage

@@ -54,7 +54,7 @@
 ## 🛡 Tests
 
 - verify `call_git_oneline()` always raises for anything but a single line [[45f5edd3]](https://github.com/datalad/datalad-core/commit/45f5edd3)
-- use a dedicated path a worktree, no re-use [[b69476c3]](https://github.com/datalad/datalad-core/commit/b69476c3)
+- use a dedicated path a worktree, no reuse [[b69476c3]](https://github.com/datalad/datalad-core/commit/b69476c3)
 
 # v0.0.0
 

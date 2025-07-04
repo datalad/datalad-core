@@ -56,7 +56,7 @@ environment:
   COVERAGE_ROOT: /home/appveyor/DLTMP
   # we pin hatch's data file to make it easy to cache it
   HATCH_DATA_DIR: /home/appveyor/hatch-data-dir
-  UV_CACHE: /home/appveyor/.cache/uv
+  UV_CACHE_DIR: /home/appveyor/.cache/uv
   HATCH_ENV_TYPE_VIRTUAL_UV_PATH: /home/appveyor/.local/bin/uv
   # oldest and newest supported, by default
   TEST_SCRIPT: "hatch test -i py=3.9,3.13 --cover --doctest-modules --durations 10"
@@ -74,7 +74,7 @@ environment:
       COVERAGE_ROOT: /Users/appveyor/DLTMP
       HATCH_DATA_DIR: /Users/appveyor/hatch-data-dir
       HATCH_ENV_TYPE_VIRTUAL_UV_PATH: /Users/appveyor/.local/bin/uv
-      UV_CACHE: /Users/appveyor/.cache/pip
+      UV_CACHE_DIR: /Users/appveyor/.cache/uv
 
     - job_name: test-win
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -89,14 +89,14 @@ environment:
       # - reset the default python to be a 64bit one
       # - include the installation target path for `uv`
       CUSTOMPATH: C:\Users\\appveyor\.local\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Windows\system32;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\PowerShell\7;C:\Program Files\7-Zip;C:\Python312-x64;C:\Python312-x64\Scripts"
-      UV_CACHE: C:\Users\appveyor\AppData\Local\uv\cache
+      UV_CACHE_DIR: C:\Users\appveyor\AppData\Local\uv\cache
 
 
 # only run the CI if there are code or tooling changes
 only_commits:
   files:
-    - datalad_core/
-    - tools/
+    - datalad_core/**/*
+    - tools/**/*
     - pyproject.toml
     - .appveyor.yml
 
@@ -112,8 +112,7 @@ for:
         - job_name: test-mac
 
     cache:
-      # pip cache
-      - "${UV_CACHE} -> .appveyor.yml"
+      - "${UV_CACHE_DIR} -> .appveyor.yml"
 
     # init cannot use any components from the repo, because it runs prior to
     # cloning it
@@ -121,6 +120,9 @@ for:
       # LOGIN: enable external SSH access to CI worker
       # needs APPVEYOR_SSH_KEY defined in project settings (or environment)
       #- curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
+      # wipe out appveyor's collection of environment shims to prevent
+      # hatch from being confused by it
+      - rm -rf /home/appveyor/.pyenv
       # install `uv`
       - curl -LsSf https://astral.sh/uv/install.sh | sh
       - source $HOME/.local/bin/env
@@ -129,7 +131,7 @@ for:
       # gh-5291
       - mkdir ~/DLTMP && export TMPDIR=~/DLTMP
 
-    test_script:
+    before_test:
       # store original TMPDIR setting to limit modification to test execution
       - export PREV_TMPDIR=$TMPDIR
       # make TMPDIR a "crippled filesystem" to test wrong assumptions of POSIX-ness
@@ -148,7 +150,6 @@ for:
           export TMPDIR=/crippledfs
         fi
       - echo TMPDIR=$TMPDIR
-      - "$TEST_SCRIPT"
 
     after_test:
       - coverage xml
@@ -165,7 +166,7 @@ for:
       only:
         - job_name: test-win
     cache:
-      - "%UV_CACHE% -> .appveyor.yml"
+      - "%UV_CACHE_DIR% -> .appveyor.yml"
       # hatch-managed python versions
       - "%HATCH_DATA_DIR%\\env\\virtual\\.pythons -> pyproject.toml"
 
@@ -190,9 +191,6 @@ for:
       # place a debug setup helper at a convenient location
       - cmd: copy tools\appveyor\env_setup.bat C:\\datalad_debug.bat
 
-    test_script:
-      - cmd: "%TEST_SCRIPT%"
-
     after_test:
       - coverage xml
       - codecovcli --auto-load-params-from AppVeyor upload-process -n "appveyor-%APPVEYOR_JOB_NAME%" --disable-search -f coverage.xml
@@ -207,10 +205,14 @@ for:
 #
 build_script:
   - uv tool install hatch
+  - uv tool install coverage[toml]
   - uv tool install codecov-cli
-  - uv tool install coverage
 
 after_build:
   # Identity setup
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
+
+test_script:
+  # oldest and newest supported, by default
+  - "hatch test -i py=3.9,3.13 --cover --doctest-modules --durations 10"

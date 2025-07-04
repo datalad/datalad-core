@@ -39,12 +39,13 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
   "datasalad >= 0.4.0",
-  "git-annex >= 10.20250520b7",
+  "git-annex",
 ]
 
 [tool.hatch.metadata]

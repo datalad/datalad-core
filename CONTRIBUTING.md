@@ -26,19 +26,13 @@ All command setup can be found in `pyproject.toml`, and given alternatively mana
 ### Run the tests (with coverage reporting)
 
 ```
-hatch test [--cover]
-```
-
-There is also a setup for matrix test runs, covering all current Python versions:
-
-```
-hatch run tests:run [<select tests>]
+hatch test [--cover] [--all]
 ```
 
 This can also be used to run tests for a specific Python version only:
 
 ```
-hatch run tests.py3.10:run [<select tests>]
+hatch test -i py=3.10 [<select tests>]
 ```
 
 ### Build the HTML documentation (under `docs/_build/html`)

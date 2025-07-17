@@ -45,7 +45,7 @@ classifiers = [
 ]
 dependencies = [
   "datasalad >= 0.4.0",
-  "git-annex",
+  "git-annex >= 10.20250721",
 ]
 
 [tool.hatch.metadata]

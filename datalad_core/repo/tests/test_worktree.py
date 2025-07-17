@@ -1,7 +1,10 @@
 import pytest
 
 from datalad_core.config import ConfigItem
-from datalad_core.runners import call_git
+from datalad_core.runners import (
+    call_annex_json_lines,
+    call_git,
+)
 
 from ..worktree import Worktree
 
@@ -159,3 +162,40 @@ def test_worktree_init_at(tmp_path):
     # we got a new instance for the repo
     assert sep_wt.repo is not sep_repo_old
     assert sep_wt.repo.path == sep_repo_path_new
+
+
+def test_secondary_worktree_w_annex(tmp_path, annexrepo):
+    wt1 = Worktree(annexrepo)
+    test_content = 'mycontent'
+    test_file_name = 'myfile.dat'
+    test_file = wt1.path / test_file_name
+    test_file.write_text(test_content)
+    call_git(['-C', str(wt1.path), 'annex', 'add', str(test_file)])
+    call_git(['-C', str(wt1.path), 'commit', '-m', 'annexed file'])
+
+    branch = 'dummy'
+    wt2_path = tmp_path / branch
+    call_git(
+        [
+            '-C',
+            str(annexrepo),
+            'worktree',
+            'add',
+            str(wt2_path),
+        ]
+    )
+    wt2 = Worktree(wt2_path)
+    assert wt2.annex is not None
+    # verifies implicitly that git-annex-info work in both worktrees
+    assert wt1.annex.uuid == wt2.annex.uuid
+
+    for wt in (wt1, wt2):
+        # annex-getting the content is needed for robustness, not all
+        # platforms have immediately usable symlinks to the annex
+        list(
+            call_annex_json_lines(
+                ['get', test_file_name],
+                git_args=['-C', str(wt.annex.path)],
+            )
+        )
+        assert (wt.path / test_file_name).read_text() == test_content

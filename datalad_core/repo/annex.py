@@ -127,14 +127,19 @@ class Annex(AnnexBase):
         and is used to resolve and confirm the presence of an annex.
         """
         try:
-            annex_loc, worktree_loc = call_git_lines(
+            # we ask for 'common-dir' in order to support secondary
+            # worktrees at `path`. This will fall back on `git-dir`.
+            # The assumptions is that any annex is located in the
+            # common dir. As of v10.20250721 git-annex does not place
+            # any additional pointers into the secondary worktree's
+            # .git
+            git_common_loc, worktree_loc = call_git_lines(
                 [
                     '-C',
                     str(path),
                     'rev-parse',
                     '--path-format=absolute',
-                    '--git-path',
-                    'annex',
+                    '--git-common-dir',
                     '--show-toplevel',
                 ],
             )
@@ -142,7 +147,7 @@ class Annex(AnnexBase):
             msg = f'cannot resolve paths for a worktree with an annex at {path}'
             raise ValueError(msg) from e
         # this simple test is also what is done in legacy AnnexRepo
-        annex_path = Path(annex_loc)
+        annex_path = Path(git_common_loc) / 'annex'
         if not annex_path.exists():
             msg = f'no repository annex found at {annex_path}'
             raise ValueError(msg)

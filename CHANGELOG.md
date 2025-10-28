@@ -1,3 +1,20 @@
+# v0.1.1 (2025-10-28)
+
+## 🐛 Bug Fixes
+
+- annex-lookup in `Annex()` now supports secondary worktrees [[9e45f2dc]](https://github.com/datalad/datalad-core/commit/9e45f2dc)
+- git-annex:
+  - bump version to include fix non-symlink repo handling [[ffa2090f]](https://github.com/datalad/datalad-core/commit/ffa2090f)
+
+## 📝 Documentation
+
+- fix typo in changelog [[5f97d088]](https://github.com/datalad/datalad-core/commit/5f97d088)
+
+## 🛡 Tests
+
+- verify annex availability via a secondary work tree [[2d1d6305]](https://github.com/datalad/datalad-core/commit/2d1d6305)
+- do not waste cycles on GPG signatures [[b4416780]](https://github.com/datalad/datalad-core/commit/b4416780)
+
 # v0.1.0 (2025-07-04)
 
 ## 💫 New features

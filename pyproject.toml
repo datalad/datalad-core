@@ -10,7 +10,7 @@ name = "datalad-core"
 dynamic = ["version"]
 description = 'core library for the datalad-framework'
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = [
   "datalad",
@@ -35,7 +35,6 @@ classifiers = [
   "Topic :: Software Development :: Version Control :: Git",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -91,7 +90,7 @@ extra-dependencies = [
 ]
 [tool.hatch.envs.types.scripts]
 check = [
-  "mypy --install-types --non-interactive --python-version 3.9 --pretty --show-error-context {args:datalad_core}",
+  "mypy --install-types --non-interactive --python-version 3.10 --pretty --show-error-context {args:datalad_core}",
 ]
 
 [tool.hatch.envs.docs]
@@ -171,7 +170,7 @@ exclude = [
 ]
 line-length = 88
 indent-width = 4
-target-version = "py39"
+target-version = "py310"
 [tool.ruff.format]
 # Prefer single quotes over double quotes.
 quote-style = "single"

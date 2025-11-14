@@ -38,4 +38,4 @@ jobs:
           # with focused error reports, rather than barfing a huge complaint
           # that is unrelated to the changeset someone has been working on.
           # run on the oldest supported Python version
-          hatch run types:mypy --python-version 3.9 --follow-imports skip --pretty --show-error-context ${{ steps.changed-py-files.outputs.all_changed_files }}
+          hatch run types:mypy --python-version 3.10 --follow-imports skip --pretty --show-error-context ${{ steps.changed-py-files.outputs.all_changed_files }}

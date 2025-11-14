@@ -26,4 +26,4 @@ jobs:
           hatch run types:mypy --install-types --non-interactive --follow-imports skip datalad_core
           # run mypy on the full project.
           # run on the oldest supported Python version
-          hatch run types:mypy --python-version 3.9 --pretty --show-error-context datalad_core
+          hatch run types:mypy --python-version 3.10 --pretty --show-error-context datalad_core

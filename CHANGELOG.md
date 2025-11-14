@@ -1,3 +1,11 @@
+# v0.1.2 (2025-11-14)
+
+- Python 3.10 is now the minimum version, because Python 3.9 went end-of-life on 2025-10-31.
+
+## 🐛 Bug Fixes
+
+- `DataladBranchConfig` now treated as read-only in a bare repository [[96c1e3e4]](https://github.com/datalad/datalad-core/commit/96c1e3e4)
+
 # v0.1.1 (2025-10-28)
 
 ## 🐛 Bug Fixes

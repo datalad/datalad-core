@@ -8,10 +8,11 @@ from pathlib import (
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from datalad_core.commands import Dataset
 
 from datalad_core.constraints.constraint import Constraint

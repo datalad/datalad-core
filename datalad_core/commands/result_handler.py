@@ -8,10 +8,10 @@ from types import MappingProxyType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from inspect import Parameter
 
 

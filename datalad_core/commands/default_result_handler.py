@@ -1,9 +1,8 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from inspect import Parameter
 from types import MappingProxyType
 from typing import (
     Any,
-    Callable,
 )
 
 from datalad_core.commands.result_handler import ResultHandler

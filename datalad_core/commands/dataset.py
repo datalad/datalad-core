@@ -103,7 +103,7 @@ class Dataset:
             self._path = ps
         else:
             if TYPE_CHECKING:
-                assert isinstance(ps, (Path, str))
+                assert isinstance(ps, Path | str)
             # could be a str-path or some magic label.
             # for now we only support a path specification
             self._path = Path(ps)

@@ -108,5 +108,6 @@ class GitManaged(Flyweighted, metaclass=PathBasedFlyweight):
                     *(p[0] for p in prop_specs),
                 ]
             ),
+            strict=False,
         ):
             setattr(self, spec[1], spec[2](val))

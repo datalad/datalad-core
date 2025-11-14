@@ -111,7 +111,12 @@ class GitConfig(CachingSource):
 
         for k, v in dct.items():
             vals = (v,) if not isinstance(v, tuple) else v
-            self.setall(
+            # we bypass the check for being writable here, and use
+            # _setall() directly. this is needed, because, e.g.
+            # a datalad branch config in a bare repo would not
+            # be writable. however, here we just load items into the
+            # cache
+            self._setall(
                 k,
                 tuple(ConfigItem(val) for val in vals),
             )

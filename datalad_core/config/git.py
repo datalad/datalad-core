@@ -144,7 +144,7 @@ class GitConfig(CachingSource):
     def _set_item(self, key: Hashable, value: Setting) -> None:
         key = _normalize_key(key)
         call_git(
-            [*self._get_git_config_cmd(), '--replace-all', str(key), str(value.value)],
+            [*self._get_git_config_cmd(), '--replace-all', str(key), str(value.pristine_value)],
             capture_output=True,
         )
         super()._set_item(key, value)
@@ -152,7 +152,7 @@ class GitConfig(CachingSource):
     def _add(self, key: Hashable, value: Setting) -> None:
         key = _normalize_key(key)
         call_git(
-            [*self._get_git_config_cmd(), '--add', str(key), str(value.value)],
+            [*self._get_git_config_cmd(), '--add', str(key), str(value.pristine_value)],
             capture_output=True,
         )
         super()._add(key, value)

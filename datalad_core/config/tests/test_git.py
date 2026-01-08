@@ -45,7 +45,6 @@ def test_global_git_config():
     del gc[target_key]
     assert target_key not in gc
 
-
 def test_global_git_config_pure(cfgman):
     orig_keys = GlobalGitConfig().keys()
     with cfgman.overrides(
@@ -71,6 +70,12 @@ def test_local_git_config(gitrepo):
     lc.load()
     # check something we would expect under all circumstances
     assert lc['core.bare'].value == 'false'
+
+    bool_key = 'dummy.my-bool'
+    lc.add(bool_key, ConfigItem('true', coercer=bool))
+    assert lc[bool_key].value is True
+    # check that the value is written in its pristine form, not `str(True)`
+    assert 'my-bool = true' in (gitrepo / '.git' / 'config').read_text()
 
 
 def test_datalad_branch_config(gitrepo):
